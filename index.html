@@ -1071,14 +1071,14 @@
             }
             
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let message = `مرحباً، أود طلب المنتجات التالية من مكتبة وألوان:\n\n`;
+            let message = `مرحباً، أود طلب المنتجات التالية من مكتبة الربيعي:\n\n`;
             cart.forEach(item => {
                 message += `• ${item.name} (العدد: ${item.qty}) - السعر: ${(item.price * item.qty).toLocaleString('ar-IQ')} د.ع\n`;
             });
             message += `\nالمجموع الكلي: ${total.toLocaleString('ar-IQ')} د.ع`;
 
             const encoded = encodeURIComponent(message);
-            window.open(`https://wa.me/9647700000000?text=${encoded}`, '_blank');
+            window.open(`https://wa.me/96407803267108?text=${encoded}`, '_blank');
         }
 
         // Quick View Function
