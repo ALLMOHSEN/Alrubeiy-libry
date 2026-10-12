@@ -60,7 +60,6 @@
                     <i class="fa-solid fa-qrcode text-blue-600"></i> قراءة الباركود أو الإدخال اليدوي
                 </h2>
                 
-                <!-- Manual / Barcode Input Form -->
                 <div class="flex gap-2">
                     <input type="text" id="manual-barcode-input" placeholder="أدخل رقم الباركود أو امسحه..." class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <button onclick="searchByBarcode(document.getElementById('manual-barcode-input').value)" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
@@ -68,10 +67,9 @@
                     </button>
                 </div>
 
-                <!-- Camera Scanner Container -->
                 <div class="border rounded-xl p-4 bg-gray-50 text-center">
                     <div id="reader" class="w-full max-w-md mx-auto rounded-lg overflow-hidden"></div>
-                    <button id="start-camera" onclick="startScanner('lookup')" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                    <button id="start-camera" onclick="startScanner()" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
                         <i class="fa-solid fa-video"></i> تشغيل الكاميرا للمسح
                     </button>
                     <button id="stop-camera" onclick="stopScanner()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition hidden">
@@ -80,7 +78,6 @@
                 </div>
             </div>
 
-            <!-- Result Display Card -->
             <div id="scan-result" class="bg-white p-6 rounded-xl shadow-sm border hidden">
                 <h3 class="text-md font-semibold text-gray-500 mb-4 border-b pb-2">معلومات المادة</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
@@ -105,10 +102,11 @@
             <div class="bg-white p-6 rounded-xl shadow-sm border">
                 <h2 id="item-form-title" class="text-lg font-bold text-gray-700 mb-4">إضافة مادة جديدة</h2>
                 
-                <!-- Camera modal / container specifically for adding items -->
+                <!-- Camera modal for adding item -->
                 <div id="item-scanner-container" class="mb-4 border rounded-xl p-3 bg-gray-50 text-center hidden">
                     <div id="item-reader" class="w-full max-w-sm mx-auto rounded-lg overflow-hidden"></div>
-                    <button type="button" onclick="stopItemScanner()" class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold">إغلاق الكاميرا</button>
+                    <p class="text-xs text-gray-500 mt-2">قم بتوجيه الكاميرا نحو الخطوط العمودية (الباركود)</p>
+                    <button type="button" onclick="stopItemScanner()" class="mt-2 bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-semibold">إغلاق الكاميرا</button>
                 </div>
 
                 <form id="item-form" onsubmit="saveItem(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -116,9 +114,9 @@
                     <div>
                         <label class="block text-sm font-semibold mb-1">رقم الباركود</label>
                         <div class="flex gap-2">
-                            <input type="text" id="item-barcode" required placeholder="اكتب الرقم أو امسح بالكاميرا" class="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                            <button type="button" onclick="startItemScanner()" class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition" title="سحب بالكاميرا">
-                                <i class="fa-solid fa-camera"></i>
+                            <input type="text" id="item-barcode" required placeholder="اكتب الرقم أو امسحه بالكاميرا" class="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                            <button type="button" onclick="startItemScanner()" class="bg-green-600 text-white px-3.5 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-1" title="سحب بالكاميرا">
+                                <i class="fa-solid fa-camera"></i> <span class="text-xs hidden sm:inline">مسح</span>
                             </button>
                         </div>
                     </div>
@@ -209,7 +207,6 @@
 
     <!-- App Logic Script -->
     <script>
-        // --- إعدادات فايربيس (Firebase Config) ---
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_AUTH_DOMAIN",
@@ -410,7 +407,7 @@
             }
         }
 
-        // --- القارئ والبحث (탭 1) ---
+        // --- القارئ والبحث (التبويب الأول) ---
         function searchByBarcode(code) {
             code = code.trim();
             if (!code) return;
@@ -431,8 +428,8 @@
         let html5QrCode = null;
         let html5QrCodeItem = null;
 
-        function startScanner(mode) {
-            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+        function startScanner() {
+            const qrCodeSuccessCallback = (decodedText) => {
                 document.getElementById('manual-barcode-input').value = decodedText;
                 searchByBarcode(decodedText);
                 stopScanner();
@@ -441,13 +438,17 @@
             html5QrCode = new Html5Qrcode("reader");
             html5QrCode.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 150 } },
+                { 
+                    fps: 15, 
+                    qrbox: { width: 280, height: 120 },
+                    aspectRatio: 1.777778
+                },
                 qrCodeSuccessCallback
             ).then(() => {
                 document.getElementById('start-camera').classList.add('hidden');
                 document.getElementById('stop-camera').classList.remove('hidden');
             }).catch(err => {
-                alert("تعذر تشغيل الكاميرا. تأكد من إعطاء الصلاحيات أو استخدام متصفح مدعوم.");
+                alert("تعذر تشغيل الكاميرا. تأكد من إعطاء الصلاحيات للمتصفح.");
             });
         }
 
@@ -460,7 +461,7 @@
             }
         }
 
-        // --- كاميرا خاصة بنموذج إضافة/تعديل المواد ---
+        // --- قارئ نموذج إضافة المواد (معدّل لزيادة دقة قراءة الخطوط العمودية) ---
         function startItemScanner() {
             const container = document.getElementById('item-scanner-container');
             container.classList.remove('hidden');
@@ -471,13 +472,31 @@
             };
 
             html5QrCodeItem = new Html5Qrcode("item-reader");
+            // تكوين إعدادات مخصصة تدعم قراءة الباركود الخطي العمودي بكفاءة عالية على الآيفون والكمبيوتر
+            const config = { 
+                fps: 20, 
+                qrbox: { width: 250, height: 100 },
+                formatsToSupport: [ 
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E
+                ]
+            };
+
             html5QrCodeItem.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 200, height: 100 } },
+                config,
                 qrCodeSuccessCallback
             ).catch(err => {
-                alert("تعذر تشغيل الكاميرا في نموذج الإضافة.");
-                container.classList.add('hidden');
+                // محاولة احتياطية في حال لم تدعم المتصفحات التنسيقات المخصصة
+                html5QrCodeItem.start({ facingMode: "environment" }, { fps: 10, qrbox: 200 }, qrCodeSuccessCallback)
+                .catch(e => {
+                    alert("تعذر تشغيل الكاميرا. تأكد من السماح للمتصفح بالوصول للكاميرا (خاصة في أجهزة آيفون عبر Safari).");
+                    container.classList.add('hidden');
+                });
             });
         }
 
@@ -485,7 +504,9 @@
             if (html5QrCodeItem && html5QrCodeItem.isScanning) {
                 html5QrCodeItem.stop().then(() => {
                     document.getElementById('item-scanner-container').classList.add('hidden');
-                }).catch(err => console.error(err));
+                }).catch(err => {
+                    document.getElementById('item-scanner-container').classList.add('hidden');
+                });
             } else {
                 document.getElementById('item-scanner-container').classList.add('hidden');
             }
@@ -515,7 +536,7 @@
                 try {
                     const content = JSON.parse(e.target.result);
                     if (content.items && content.categories) {
-                        if (confirm('هل أنت متأكد من استعادة النسخة الاحتياطية؟ سيتم دمج البيانات أو تحديثها.')) {
+                        if (confirm('هل أنت متأكد من استعادة النسخة الاحتياطية؟ سيتم تحديث البيانات.')) {
                             content.items.forEach(item => saveDataLocalOrCloud('items', item.id || ('item_' + Math.random()), item));
                             content.categories.forEach(cat => saveDataLocalOrCloud('categories', cat.id || ('cat_' + Math.random()), cat));
                             alert('تم استعادة النسخة الاحتياطية بنجاح!');
