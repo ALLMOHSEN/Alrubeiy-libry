@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة المواد والأسعار السحابي والمحلي</title>
+    <title>نظام إدارة المواد والأسعار</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- HTML5 QR Code Scanner -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <!-- Firebase SDK (Compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
         body { font-family: 'Cairo', sans-serif; }
@@ -26,8 +23,8 @@
             <h1 class="text-xl font-bold flex items-center gap-2">
                 <i class="fa-solid fa-barcode"></i> نظام إدارة المواد والأسعار
             </h1>
-            <div id="sync-status" class="text-xs bg-blue-700 px-3 py-1 rounded-full flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-yellow-400 inline-block animate-pulse"></span> جاري التحميل...
+            <div class="text-xs bg-blue-700 px-3 py-1 rounded-full flex items-center gap-1 text-white">
+                <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> البيانات محفوظة محلياً
             </div>
         </div>
     </header>
@@ -57,7 +54,7 @@
         <section id="tab-scanner" class="tab-content space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
                 <h2 class="text-lg font-bold text-gray-700 flex items-center gap-2">
-                    <i class="fa-solid fa-qrcode text-blue-600"></i> قراءة الباركود أو الإدخال اليدوي
+                    <i class="fa-solid fa-qrcode text-blue-600"></i> قراءة الباركود أو الإدخال اليدوي للبحث
                 </h2>
                 
                 <div class="flex gap-2">
@@ -102,7 +99,7 @@
             <div class="bg-white p-6 rounded-xl shadow-sm border">
                 <h2 id="item-form-title" class="text-lg font-bold text-gray-700 mb-4">إضافة مادة جديدة</h2>
                 
-                <!-- Camera modal for adding item (High Speed) -->
+                <!-- Camera modal for adding item -->
                 <div id="item-scanner-container" class="mb-4 border rounded-xl p-3 bg-gray-50 text-center hidden">
                     <div id="item-reader" class="w-full max-w-sm mx-auto rounded-lg overflow-hidden"></div>
                     <p class="text-xs text-gray-500 mt-2">وجّه الكاميرا نحو باركود المادة للقراءة الفورية</p>
@@ -114,7 +111,7 @@
                     <div>
                         <label class="block text-sm font-semibold mb-1">رقم الباركود</label>
                         <div class="flex gap-2">
-                            <input type="text" id="item-barcode" required placeholder="اكتب الرقم أو امسحه بكاميرا سريعة" class="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="item-barcode" required placeholder="اكتب الرقم أو امسحه بالكاميرا" class="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                             <button type="button" onclick="startItemScanner()" class="bg-green-600 text-white px-3.5 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-1" title="مسح بالكاميرا">
                                 <i class="fa-solid fa-camera"></i> <span class="text-xs hidden sm:inline">سحب</span>
                             </button>
@@ -207,88 +204,19 @@
 
     <!-- App Logic Script -->
     <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        let db;
-        let isCloudConnected = false;
-
-        // تحميل البيانات أولاً من الذاكرة المحلية (Local Storage) لضمان ظهورها فوراً ودون انتظار
-        let itemsData = JSON.parse(localStorage.getItem('inventory_items') || '[]');
-        let categoriesData = JSON.parse(localStorage.getItem('inventory_categories') || '[]');
+        // تحميل البيانات مباشرة من الذاكرة المحلية عند فتح الصفحة لضمان عدم ضياعها أبداً
+        let itemsData = JSON.parse(localStorage.getItem('my_inventory_items') || '[]');
+        let categoriesData = JSON.parse(localStorage.getItem('my_inventory_categories') || '[]');
 
         window.onload = function() {
             updateCategoriesUI();
             renderItemsTable();
-            initCloudSync();
         };
 
-        function initCloudSync() {
-            try {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-                isCloudConnected = true;
-                document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> متصل بالسحاب والمحلي';
-
-                // مزامنة فورية من السحاب
-                db.collection("categories").onSnapshot(snapshot => {
-                    categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    localStorage.setItem('inventory_categories', JSON.stringify(categoriesData));
-                    updateCategoriesUI();
-                });
-
-                db.collection("items").onSnapshot(snapshot => {
-                    itemsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    localStorage.setItem('inventory_items', JSON.stringify(itemsData));
-                    renderItemsTable();
-                });
-            } catch (e) {
-                document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-400 inline-block"></span> التخزين المحلي النشط';
-            }
-        }
-
-        function saveDataLocalOrCloud(collectionName, id, data) {
-            // حفظ محلي فوري أولاً لضمان عدم ضياع البيانات عند التحديث
-            if (collectionName === 'items') {
-                let index = itemsData.findIndex(i => i.id === id);
-                if (index >= 0) itemsData[index] = { id, ...data };
-                else itemsData.push({ id, ...data });
-                localStorage.setItem('inventory_items', JSON.stringify(itemsData));
-                renderItemsTable();
-            } else {
-                let index = categoriesData.findIndex(c => c.id === id);
-                if (index >= 0) categoriesData[index] = { id, ...data };
-                else categoriesData.push({ id, ...data });
-                localStorage.setItem('inventory_categories', JSON.stringify(categoriesData));
-                updateCategoriesUI();
-            }
-
-            // حفظ سحابي في الخلفية إن وجد
-            if (isCloudConnected && db) {
-                db.collection(collectionName).doc(id).set(data).catch(err => console.log(err));
-            }
-        }
-
-        function deleteDataLocalOrCloud(collectionName, id) {
-            if (collectionName === 'items') {
-                itemsData = itemsData.filter(i => i.id !== id);
-                localStorage.setItem('inventory_items', JSON.stringify(itemsData));
-                renderItemsTable();
-            } else {
-                categoriesData = categoriesData.filter(c => c.id !== id);
-                localStorage.setItem('inventory_categories', JSON.stringify(categoriesData));
-                updateCategoriesUI();
-            }
-
-            if (isCloudConnected && db) {
-                db.collection(collectionName).doc(id).delete().catch(err => console.log(err));
-            }
+        // حفظ البيانات في الذاكرة المحلية
+        function persistData() {
+            localStorage.setItem('my_inventory_items', JSON.stringify(itemsData));
+            localStorage.setItem('my_inventory_categories', JSON.stringify(categoriesData));
         }
 
         function switchTab(tabId) {
@@ -308,9 +236,19 @@
             e.preventDefault();
             const name = document.getElementById('category-name').value.trim();
             if (!name) return;
+            
+            // التأكد من عدم تكرار القسم
+            if(categoriesData.some(c => c.name === name)) {
+                alert('هذا القسم موجود مسبقاً!');
+                return;
+            }
+
             const id = 'cat_' + Date.now();
-            saveDataLocalOrCloud('categories', id, { name });
+            categoriesData.push({ id, name });
+            persistData();
+            updateCategoriesUI();
             document.getElementById('category-name').value = '';
+            alert('تم إضافة القسم بنجاح!');
         }
 
         function updateCategoriesUI() {
@@ -331,7 +269,9 @@
 
         function deleteCategory(id) {
             if (confirm('هل أنت متأكد من حذف هذا القسم؟')) {
-                deleteDataLocalOrCloud('categories', id);
+                categoriesData = categoriesData.filter(c => c.id !== id);
+                persistData();
+                updateCategoriesUI();
             }
         }
 
@@ -339,17 +279,36 @@
         function saveItem(e) {
             e.preventDefault();
             const editId = document.getElementById('edit-item-id').value;
-            const id = editId ? editId : 'item_' + Date.now();
-            const data = {
-                barcode: document.getElementById('item-barcode').value.trim(),
-                name: document.getElementById('item-name').value.trim(),
-                category: document.getElementById('item-category').value,
-                price: parseFloat(document.getElementById('item-price').value)
-            };
+            const barcode = document.getElementById('item-barcode').value.trim();
+            const name = document.getElementById('item-name').value.trim();
+            const category = document.getElementById('item-category').value;
+            const price = parseFloat(document.getElementById('item-price').value);
 
-            saveDataLocalOrCloud('items', id, data);
+            if (editId) {
+                // تعديل مادة موجودة
+                let item = itemsData.find(i => i.id === editId);
+                if (item) {
+                    item.barcode = barcode;
+                    item.name = name;
+                    item.category = category;
+                    item.price = price;
+                }
+            } else {
+                // إضافة مادة جديدة
+                const newItem = {
+                    id: 'item_' + Date.now(),
+                    barcode,
+                    name,
+                    category,
+                    price
+                };
+                itemsData.push(newItem);
+            }
+
+            persistData();
+            renderItemsTable();
             resetItemForm();
-            alert('تم حفظ المادة بنجاح!');
+            alert('تم حفظ المادة بنجاح وتثبيتها في الذاكرة!');
         }
 
         function renderItemsTable() {
@@ -369,8 +328,8 @@
                     <td class="p-3"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${item.category}</span></td>
                     <td class="p-3 text-blue-600 font-bold">${item.price}</td>
                     <td class="p-3 text-center space-x-2 space-x-reverse">
-                        <button onclick="editItem('${item.id}')" class="text-blue-500 hover:text-blue-700"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="editItem('${item.id}')" class="text-blue-500 hover:text-blue-700" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700" title="حذف"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -399,11 +358,13 @@
 
         function deleteItem(id) {
             if (confirm('هل أنت متأكد من حذف هذه المادة؟')) {
-                deleteDataLocalOrCloud('items', id);
+                itemsData = itemsData.filter(i => i.id !== id);
+                persistData();
+                renderItemsTable();
             }
         }
 
-        // --- القارئ الفائق السرعة ---
+        // --- البحث الفوري بالباركود ---
         function searchByBarcode(code) {
             code = code.trim();
             if (!code) return;
@@ -424,9 +385,8 @@
         let html5QrCode = null;
         let html5QrCodeItem = null;
 
-        // إعدادات فائقة السرعة للمسح
         const fastScannerConfig = {
-            fps: 30, // سرعة إطارات عالية لالتقاط الباركود فوراً
+            fps: 30,
             qrbox: { width: 260, height: 110 },
             formatsToSupport: [ 
                 Html5QrcodeSupportedFormats.EAN_13,
@@ -452,7 +412,7 @@
             ).then(() => {
                 document.getElementById('start-camera').classList.add('hidden');
                 document.getElementById('stop-camera').classList.remove('hidden');
-            }).catch(err => alert("تعذر تشغيل الكاميرا. تأكد من السماح للأذونات."));
+            }).catch(err => alert("تعذر تشغيل الكاميرا. تأكد من إعطاء الصلاحيات."));
         }
 
         function stopScanner() {
@@ -478,7 +438,6 @@
                     stopItemScanner();
                 }
             ).catch(err => {
-                // محاولة احتياطية ثانية في حال فشل التنسيقات المخصصة
                 html5QrCodeItem.start({ facingMode: "environment" }, { fps: 20, qrbox: 200 }, (text) => {
                     document.getElementById('item-barcode').value = text;
                     stopItemScanner();
@@ -501,7 +460,7 @@
             }
         }
 
-        // --- النسخ الاحتياطي ---
+        // --- النسخ الاحتياطي (Backup Export & Import) ---
         function exportBackup() {
             const backupData = {
                 items: itemsData,
@@ -525,10 +484,23 @@
                 try {
                     const content = JSON.parse(e.target.result);
                     if (content.items && content.categories) {
-                        if (confirm('هل أنت متأكد من استعادة النسخة الاحتياطية؟ سيتم دمج وتحديث البيانات.')) {
-                            content.items.forEach(item => saveDataLocalOrCloud('items', item.id || ('item_' + Math.random()), item));
-                            content.categories.forEach(cat => saveDataLocalOrCloud('categories', cat.id || ('cat_' + Math.random()), cat));
-                            alert('تم استعادة النسخة الاحتياطية بنجاح!');
+                        if (confirm('هل أنت متأكد من استعادة النسخة الاحتياطية؟ سيتم دمج البيانات الجديدة مع البيانات الحالية.')) {
+                            // دمج المواد بدون تكرار حسب الباركود أو الـ ID
+                            content.items.forEach(newItem => {
+                                if(!itemsData.some(i => i.id === newItem.id || i.barcode === newItem.barcode)) {
+                                    itemsData.push(newItem);
+                                }
+                            });
+                            // دمج الأقسام بدون تكرار حسب الاسم
+                            content.categories.forEach(newCat => {
+                                if(!categoriesData.some(c => c.name === newCat.name)) {
+                                    categoriesData.push(newCat);
+                                }
+                            });
+                            persistData();
+                            updateCategoriesUI();
+                            renderItemsTable();
+                            alert('تمت استعادة ودمج النسخة الاحتياطية بنجاح!');
                         }
                     } else {
                         alert('ملف النسخة الاحتياطية غير صالح!');
