@@ -6,6 +6,11 @@
     <title>نظام إدارة المواد والأسعار</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- HTML5 QR Code Scanner -->
@@ -15,33 +20,39 @@
         body { font-family: 'Cairo', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen">
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
 
     <!-- Header -->
-    <header class="bg-blue-600 text-white shadow-md">
+    <header class="bg-blue-600 dark:bg-gray-800 text-white shadow-md transition-colors duration-200">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <h1 class="text-xl font-bold flex items-center gap-2">
                 <i class="fa-solid fa-barcode"></i> نظام إدارة المواد والأسعار
             </h1>
-            <div class="text-xs bg-blue-700 px-3 py-1 rounded-full flex items-center gap-1 text-white">
-                <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> البيانات محفوظة محلياً
+            <div class="flex items-center gap-3">
+                <!-- Dark Mode Toggle Button -->
+                <button onclick="toggleDarkMode()" id="dark-mode-btn" class="bg-blue-700 dark:bg-gray-700 hover:bg-blue-800 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 transition">
+                    <i id="dark-mode-icon" class="fa-solid fa-moon"></i> <span id="dark-mode-text">الوضع الداكن</span>
+                </button>
+                <div class="text-xs bg-blue-700 dark:bg-gray-700 px-3 py-1.5 rounded-full flex items-center gap-1 text-white">
+                    <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> محفوظ محلياً
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Navigation Tabs -->
-    <nav class="bg-white shadow border-b">
+    <nav class="bg-white dark:bg-gray-800 shadow border-b dark:border-gray-700 transition-colors duration-200">
         <div class="container mx-auto px-4 flex gap-2 overflow-x-auto">
-            <button onclick="switchTab('scanner')" id="btn-scanner" class="tab-btn px-4 py-3 font-semibold border-b-2 border-blue-600 text-blue-600 flex items-center gap-2 whitespace-nowrap">
+            <button onclick="switchTab('scanner')" id="btn-scanner" class="tab-btn px-4 py-3 font-semibold border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-camera"></i> القارئ والبحث السريع
             </button>
-            <button onclick="switchTab('items')" id="btn-items" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 flex items-center gap-2 whitespace-nowrap">
+            <button onclick="switchTab('items')" id="btn-items" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 dark:text-gray-300 flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-boxes-stacked"></i> إدارة المواد
             </button>
-            <button onclick="switchTab('categories')" id="btn-categories" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 flex items-center gap-2 whitespace-nowrap">
+            <button onclick="switchTab('categories')" id="btn-categories" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 dark:text-gray-300 flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-layer-group"></i> الأقسام
             </button>
-            <button onclick="switchTab('backup')" id="btn-backup" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 flex items-center gap-2 whitespace-nowrap">
+            <button onclick="switchTab('backup')" id="btn-backup" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 dark:text-gray-300 flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-database"></i> النسخ الاحتياطي
             </button>
         </div>
@@ -52,43 +63,43 @@
 
         <!-- TAB 1: SCANNER & LOOKUP -->
         <section id="tab-scanner" class="tab-content space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-                <h2 class="text-lg font-bold text-gray-700 flex items-center gap-2">
-                    <i class="fa-solid fa-qrcode text-blue-600"></i> قراءة الباركود أو الإدخال اليدوي للبحث
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 space-y-4 transition-colors duration-200">
+                <h2 class="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                    <i class="fa-solid fa-qrcode text-blue-600 dark:text-blue-400"></i> قراءة الباركود أو الإدخال اليدوي للبحث
                 </h2>
                 
                 <div class="flex gap-2">
-                    <input type="text" id="manual-barcode-input" placeholder="أدخل رقم الباركود أو امسحه..." class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="searchByBarcode(document.getElementById('manual-barcode-input').value)" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                    <input type="text" id="manual-barcode-input" placeholder="أدخل رقم الباركود أو امسحه..." class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="searchByBarcode(document.getElementById('manual-barcode-input').value)" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition">
                         بحث
                     </button>
                 </div>
 
-                <div class="border rounded-xl p-4 bg-gray-50 text-center">
+                <div class="border dark:border-gray-700 rounded-xl p-4 bg-gray-50 dark:bg-gray-900 text-center">
                     <div id="reader" class="w-full max-w-md mx-auto rounded-lg overflow-hidden"></div>
-                    <button id="start-camera" onclick="startScanner()" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                    <button id="start-camera" onclick="startScanner()" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
                         <i class="fa-solid fa-video"></i> تشغيل الكاميرا الفورية
                     </button>
-                    <button id="stop-camera" onclick="stopScanner()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition hidden">
+                    <button id="stop-camera" onclick="stopScanner()" class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition hidden">
                         <i class="fa-solid fa-video-slash"></i> إيقاف الكاميرا
                     </button>
                 </div>
             </div>
 
-            <div id="scan-result" class="bg-white p-6 rounded-xl shadow-sm border hidden">
-                <h3 class="text-md font-semibold text-gray-500 mb-4 border-b pb-2">معلومات المادة</h3>
+            <div id="scan-result" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 hidden transition-colors duration-200">
+                <h3 class="text-md font-semibold text-gray-500 dark:text-gray-400 mb-4 border-b dark:border-gray-700 pb-2">معلومات المادة</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <span class="block text-xs text-gray-500 mb-1">اسم المادة</span>
-                        <span id="res-name" class="text-lg font-bold text-blue-900">-</span>
+                    <div class="bg-blue-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <span class="block text-xs text-gray-500 dark:text-gray-300 mb-1">اسم المادة</span>
+                        <span id="res-name" class="text-lg font-bold text-blue-900 dark:text-blue-300">-</span>
                     </div>
-                    <div class="bg-green-50 p-4 rounded-lg">
-                        <span class="block text-xs text-gray-500 mb-1">القسم / التصنيف</span>
-                        <span id="res-category" class="text-lg font-bold text-green-900">-</span>
+                    <div class="bg-green-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <span class="block text-xs text-gray-500 dark:text-gray-300 mb-1">القسم / التصنيف</span>
+                        <span id="res-category" class="text-lg font-bold text-green-900 dark:text-green-300">-</span>
                     </div>
-                    <div class="bg-amber-50 p-4 rounded-lg">
-                        <span class="block text-xs text-gray-500 mb-1">السعر</span>
-                        <span id="res-price" class="text-lg font-bold text-amber-900">-</span>
+                    <div class="bg-amber-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <span class="block text-xs text-gray-500 dark:text-gray-300 mb-1">السعر</span>
+                        <span id="res-price" class="text-lg font-bold text-amber-900 dark:text-amber-300">-</span>
                     </div>
                 </div>
             </div>
@@ -96,14 +107,14 @@
 
         <!-- TAB 2: ITEMS MANAGEMENT -->
         <section id="tab-items" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <h2 id="item-form-title" class="text-lg font-bold text-gray-700 mb-4">إضافة مادة جديدة</h2>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 transition-colors duration-200">
+                <h2 id="item-form-title" class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4">إضافة مادة جديدة</h2>
                 
                 <!-- Camera modal for adding item -->
-                <div id="item-scanner-container" class="mb-4 border rounded-xl p-3 bg-gray-50 text-center hidden">
+                <div id="item-scanner-container" class="mb-4 border dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-gray-900 text-center hidden">
                     <div id="item-reader" class="w-full max-w-sm mx-auto rounded-lg overflow-hidden"></div>
-                    <p class="text-xs text-gray-500 mt-2">وجّه الكاميرا نحو باركود المادة للقراءة الفورية</p>
-                    <button type="button" onclick="stopItemScanner()" class="mt-2 bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-semibold">إغلاق الكاميرا</button>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">وجّه الكاميرا نحو باركود المادة للقراءة الفورية</p>
+                    <button type="button" onclick="stopItemScanner()" class="mt-2 bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-xs font-semibold">إغلاق الكاميرا</button>
                 </div>
 
                 <form id="item-form" onsubmit="saveItem(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -111,43 +122,49 @@
                     <div>
                         <label class="block text-sm font-semibold mb-1">رقم الباركود</label>
                         <div class="flex gap-2">
-                            <input type="text" id="item-barcode" required placeholder="اكتب الرقم أو امسحه بالكاميرا" class="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                            <button type="button" onclick="startItemScanner()" class="bg-green-600 text-white px-3.5 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-1" title="مسح بالكاميرا">
+                            <input type="text" id="item-barcode" required placeholder="اكتب الرقم أو امسحه بالكاميرا" class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                            <button type="button" onclick="startItemScanner()" class="bg-green-600 hover:bg-green-700 text-white px-3.5 py-2 rounded-lg transition flex items-center gap-1" title="مسح بالكاميرا">
                                 <i class="fa-solid fa-camera"></i> <span class="text-xs hidden sm:inline">سحب</span>
                             </button>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">اسم المادة</label>
-                        <input type="text" id="item-name" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="item-name" required placeholder="اكتب اسم المادة هنا..." class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">القسم</label>
-                        <select id="item-category" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                        <select id="item-category" required class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                             <option value="">اختر القسم...</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">السعر</label>
-                        <input type="number" step="0.01" id="item-price" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                        <input type="number" step="0.01" id="item-price" required class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="md:col-span-2 flex gap-2">
-                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حفظ المادة</button>
-                        <button type="button" onclick="resetItemForm()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition hidden" id="cancel-edit-btn">إلغاء</button>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition">حفظ المادة</button>
+                        <button type="button" onclick="resetItemForm()" class="bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition hidden" id="cancel-edit-btn">إلغاء</button>
                     </div>
                 </form>
             </div>
 
-            <!-- Items Table -->
-            <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-                <div class="p-4 border-b flex justify-between items-center">
-                    <h3 class="font-bold text-gray-700">قائمة المواد المخزنة</h3>
-                    <input type="text" id="search-items" oninput="renderItemsTable()" placeholder="بحث في المواد..." class="border rounded-lg px-3 py-1 text-sm">
+            <!-- Items Table & Name Search -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden transition-colors duration-200">
+                <div class="p-4 border-b dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h3 class="font-bold text-gray-700 dark:text-gray-200">قائمة المواد المخزنة</h3>
+                    <!-- Search by name/barcode/category input -->
+                    <div class="relative w-full md:w-72">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="search-items" oninput="renderItemsTable()" placeholder="ابحث باسم المادة، الباركود، القسم..." class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg pr-9 pl-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-right border-collapse">
                         <thead>
-                            <tr class="bg-gray-100 text-gray-600 text-sm">
+                            <tr class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm">
                                 <th class="p-3">الباركود</th>
                                 <th class="p-3">اسم المادة</th>
                                 <th class="p-3">القسم</th>
@@ -155,7 +172,7 @@
                                 <th class="p-3 text-center">إجراءات</th>
                             </tr>
                         </thead>
-                        <tbody id="items-table-body" class="divide-y text-sm">
+                        <tbody id="items-table-body" class="divide-y dark:divide-gray-700 text-sm">
                             <!-- Items inserted dynamically -->
                         </tbody>
                     </table>
@@ -165,16 +182,16 @@
 
         <!-- TAB 3: CATEGORIES MANAGEMENT -->
         <section id="tab-categories" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <h2 class="text-lg font-bold text-gray-700 mb-4">إضافة قسم جديد</h2>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 transition-colors duration-200">
+                <h2 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4">إضافة قسم جديد</h2>
                 <form onsubmit="saveCategory(event)" class="flex gap-2">
-                    <input type="text" id="category-name" placeholder="اسم القسم (مثال: مشروبات، إلكترونيات...)" required class="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
-                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">إضافة القسم</button>
+                    <input type="text" id="category-name" placeholder="اسم القسم (مثال: مشروبات، إلكترونيات...)" required class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition">إضافة القسم</button>
                 </form>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border p-6">
-                <h3 class="font-bold text-gray-700 mb-4">الأقسام الحالية</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-6 transition-colors duration-200">
+                <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4">الأقسام الحالية</h3>
                 <div id="categories-list" class="flex flex-wrap gap-2">
                     <!-- Categories pills inserted dynamically -->
                 </div>
@@ -183,16 +200,16 @@
 
         <!-- TAB 4: BACKUP & SYNC -->
         <section id="tab-backup" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-                <h2 class="text-lg font-bold text-gray-700">النسخ الاحتياطي واستعادة البيانات</h2>
-                <p class="text-sm text-gray-500">تصدير واستيراد ملفات الباك اب (JSON) لحفظ أو استعادة البيانات في أي وقت.</p>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 space-y-4 transition-colors duration-200">
+                <h2 class="text-lg font-bold text-gray-700 dark:text-gray-200">النسخ الاحتياطي واستعادة البيانات</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">تصدير واستيراد ملفات الباك اب (JSON) لحفظ أو استعادة البيانات في أي وقت.</p>
                 
                 <div class="flex flex-wrap gap-4 pt-2">
-                    <button onclick="exportBackup()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center gap-2">
+                    <button onclick="exportBackup()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition flex items-center gap-2">
                         <i class="fa-solid fa-download"></i> تصدير ملف الباك اب (Export)
                     </button>
                     
-                    <label class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition cursor-pointer flex items-center gap-2">
+                    <label class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition cursor-pointer flex items-center gap-2">
                         <i class="fa-solid fa-upload"></i> استيراد ملف الباك اب (Import)
                         <input type="file" id="import-file" accept=".json" onchange="importBackup(event)" class="hidden">
                     </label>
@@ -204,14 +221,39 @@
 
     <!-- App Logic Script -->
     <script>
-        // تحميل البيانات مباشرة من الذاكرة المحلية عند فتح الصفحة لضمان عدم ضياعها أبداً
+        // تحميل البيانات والوضع الداكن من الذاكرة المحلية
         let itemsData = JSON.parse(localStorage.getItem('my_inventory_items') || '[]');
         let categoriesData = JSON.parse(localStorage.getItem('my_inventory_categories') || '[]');
+        let isDarkMode = localStorage.getItem('my_inventory_dark_mode') === 'true';
 
         window.onload = function() {
+            applyDarkModePreference();
             updateCategoriesUI();
             renderItemsTable();
         };
+
+        // --- نظام الوضع الداكن ---
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('my_inventory_dark_mode', isDarkMode);
+            applyDarkModePreference();
+        }
+
+        function applyDarkModePreference() {
+            const htmlEl = document.documentElement;
+            const iconEl = document.getElementById('dark-mode-icon');
+            const textEl = document.getElementById('dark-mode-text');
+
+            if (isDarkMode) {
+                htmlEl.classList.add('dark');
+                iconEl.className = 'fa-solid fa-sun';
+                textEl.innerText = 'الوضع الفاتح';
+            } else {
+                htmlEl.classList.remove('dark');
+                iconEl.className = 'fa-solid fa-moon';
+                textEl.innerText = 'الوضع الداكن';
+            }
+        }
 
         // حفظ البيانات في الذاكرة المحلية
         function persistData() {
@@ -222,11 +264,11 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('border-blue-600', 'text-blue-600');
-                el.classList.add('border-transparent', 'text-gray-600');
+                el.classList.remove('border-blue-600', 'text-blue-600', 'dark:text-blue-400');
+                el.classList.add('border-transparent', 'text-gray-600', 'dark:text-gray-300');
             });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
-            document.getElementById('btn-' + tabId).classList.add('border-blue-600', 'text-blue-600');
+            document.getElementById('btn-' + tabId).classList.add('border-blue-600', 'text-blue-600', 'dark:text-blue-400');
             if(tabId !== 'scanner') stopScanner();
             if(tabId !== 'items') stopItemScanner();
         }
@@ -237,7 +279,6 @@
             const name = document.getElementById('category-name').value.trim();
             if (!name) return;
             
-            // التأكد من عدم تكرار القسم
             if(categoriesData.some(c => c.name === name)) {
                 alert('هذا القسم موجود مسبقاً!');
                 return;
@@ -256,7 +297,7 @@
             const selectEl = document.getElementById('item-category');
             
             listEl.innerHTML = categoriesData.map(cat => `
-                <div class="bg-gray-100 border px-3 py-2 rounded-lg flex items-center gap-3">
+                <div class="bg-gray-100 dark:bg-gray-700 border dark:border-gray-600 px-3 py-2 rounded-lg flex items-center gap-3">
                     <span class="font-semibold">${cat.name}</span>
                     <button onclick="deleteCategory('${cat.id}')" class="text-red-500 hover:text-red-700 text-xs"><i class="fa-solid fa-trash"></i></button>
                 </div>
@@ -285,7 +326,6 @@
             const price = parseFloat(document.getElementById('item-price').value);
 
             if (editId) {
-                // تعديل مادة موجودة
                 let item = itemsData.find(i => i.id === editId);
                 if (item) {
                     item.barcode = barcode;
@@ -294,7 +334,6 @@
                     item.price = price;
                 }
             } else {
-                // إضافة مادة جديدة
                 const newItem = {
                     id: 'item_' + Date.now(),
                     barcode,
@@ -308,25 +347,26 @@
             persistData();
             renderItemsTable();
             resetItemForm();
-            alert('تم حفظ المادة بنجاح وتثبيتها في الذاكرة!');
+            alert('تم حفظ المادة بنجاح!');
         }
 
+        // --- خاصية البحث عن المادة (بالاسم، الباركود، أو القسم) ---
         function renderItemsTable() {
             const tbody = document.getElementById('items-table-body');
-            const query = document.getElementById('search-items').value.toLowerCase();
+            const query = document.getElementById('search-items').value.toLowerCase().trim();
             
             const filtered = itemsData.filter(i => 
                 i.name.toLowerCase().includes(query) || 
-                i.barcode.includes(query) || 
+                i.barcode.toLowerCase().includes(query) || 
                 i.category.toLowerCase().includes(query)
             );
 
             tbody.innerHTML = filtered.map(item => `
-                <tr class="hover:bg-gray-50 border-b">
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b dark:border-gray-700 transition-colors">
                     <td class="p-3 font-mono">${item.barcode}</td>
                     <td class="p-3 font-semibold">${item.name}</td>
-                    <td class="p-3"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${item.category}</span></td>
-                    <td class="p-3 text-blue-600 font-bold">${item.price}</td>
+                    <td class="p-3"><span class="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 text-xs px-2 py-1 rounded">${item.category}</span></td>
+                    <td class="p-3 text-blue-600 dark:text-blue-400 font-bold">${item.price}</td>
                     <td class="p-3 text-center space-x-2 space-x-reverse">
                         <button onclick="editItem('${item.id}')" class="text-blue-500 hover:text-blue-700" title="تعديل"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700" title="حذف"><i class="fa-solid fa-trash"></i></button>
@@ -364,7 +404,7 @@
             }
         }
 
-        // --- البحث الفوري بالباركود ---
+        // --- البحث الفوري بالباركود في التبويب الأول ---
         function searchByBarcode(code) {
             code = code.trim();
             if (!code) return;
@@ -485,13 +525,11 @@
                     const content = JSON.parse(e.target.result);
                     if (content.items && content.categories) {
                         if (confirm('هل أنت متأكد من استعادة النسخة الاحتياطية؟ سيتم دمج البيانات الجديدة مع البيانات الحالية.')) {
-                            // دمج المواد بدون تكرار حسب الباركود أو الـ ID
                             content.items.forEach(newItem => {
                                 if(!itemsData.some(i => i.id === newItem.id || i.barcode === newItem.barcode)) {
                                     itemsData.push(newItem);
                                 }
                             });
-                            // دمج الأقسام بدون تكرار حسب الاسم
                             content.categories.forEach(newCat => {
                                 if(!categoriesData.some(c => c.name === newCat.name)) {
                                     categoriesData.push(newCat);
