@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة المواد والفواتير</title>
+    <title>نظام إدارة المواد والفواتير والتقارير</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -29,7 +29,6 @@
                 <i class="fa-solid fa-cash-register"></i> نظام إدارة المواد والفواتير
             </h1>
             <div class="flex items-center gap-3">
-                <!-- Dark Mode Toggle Button -->
                 <button onclick="toggleDarkMode()" id="dark-mode-btn" class="bg-blue-700 dark:bg-gray-700 hover:bg-blue-800 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 transition">
                     <i id="dark-mode-icon" class="fa-solid fa-moon"></i> <span id="dark-mode-text">الوضع الداكن</span>
                 </button>
@@ -44,7 +43,10 @@
     <nav class="bg-white dark:bg-gray-800 shadow border-b dark:border-gray-700 transition-colors duration-200">
         <div class="container mx-auto px-4 flex gap-2 overflow-x-auto">
             <button onclick="switchTab('scanner')" id="btn-scanner" class="tab-btn px-4 py-3 font-semibold border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 flex items-center gap-2 whitespace-nowrap">
-                <i class="fa-solid fa-cash-register"></i> القارئ والفاتورة (الكاشير)
+                <i class="fa-solid fa-cash-register"></i> الكاشير وفاتورة البيع
+            </button>
+            <button onclick="switchTab('invoices')" id="btn-invoices" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 dark:text-gray-300 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-file-invoice"></i> أرشيف الفواتير والتقارير
             </button>
             <button onclick="switchTab('items')" id="btn-items" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 dark:text-gray-300 flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-boxes-stacked"></i> إدارة المواد
@@ -68,21 +70,18 @@
                     <i class="fa-solid fa-qrcode text-blue-600 dark:text-blue-400"></i> قارئ الباركود وإضافة المواد للفاتورة
                 </h2>
                 
-                <!-- Barcode Search Input -->
                 <div class="flex gap-2">
-                    <input type="text" id="manual-barcode-input" placeholder="أدخل أو امسح الباركود لإضافته للفاتورة..." class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="manual-barcode-input" placeholder="أدخل أو امسحه الباركود لإضافته للفاتورة..." class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <button onclick="handleBarcodeSearch(document.getElementById('manual-barcode-input').value)" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition">
                         إضافة للفاتورة
                     </button>
                 </div>
 
-                <!-- Search Item by Name for Invoice Quick Add -->
                 <div class="relative">
                     <input type="text" id="quick-name-search" oninput="showQuickSuggestions(this.value)" placeholder="أو ابحث عن اسم المادة للإضافة السريعة..." class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500">
                     <div id="quick-suggestions" class="absolute z-10 w-full bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg mt-1 shadow-lg hidden max-h-48 overflow-y-auto"></div>
                 </div>
 
-                <!-- Camera Container -->
                 <div class="border dark:border-gray-700 rounded-xl p-4 bg-gray-50 dark:bg-gray-900 text-center">
                     <div id="reader" class="w-full max-w-md mx-auto rounded-lg overflow-hidden"></div>
                     <button id="start-camera" onclick="startScanner()" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
@@ -94,7 +93,7 @@
                 </div>
             </div>
 
-            <!-- INVOICE SECTION (الفاتورة) -->
+            <!-- INVOICE SECTION -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 space-y-4 transition-colors duration-200">
                 <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3">
                     <h3 class="text-md font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
@@ -105,7 +104,6 @@
                     </button>
                 </div>
 
-                <!-- Invoice Table -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-right border-collapse text-sm">
                         <thead>
@@ -119,19 +117,17 @@
                             </tr>
                         </thead>
                         <tbody id="invoice-items-body" class="divide-y dark:divide-gray-700">
-                            <!-- Invoice rows will be injected here -->
+                            <!-- Invoice rows -->
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Invoice Totals & Checkout -->
                 <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700 space-y-3">
                     <div class="flex justify-between items-center text-lg font-bold">
                         <span>المجموع الإجمالي:</span>
                         <span id="invoice-total-amount" class="text-blue-600 dark:text-blue-400">0 د.ع</span>
                     </div>
 
-                    <!-- Payment & Change Calculator -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t dark:border-gray-800">
                         <div>
                             <label class="block text-xs font-semibold mb-1">المبلغ المدفوع (د.ع)</label>
@@ -143,7 +139,7 @@
                         </div>
                         <div class="flex items-end">
                             <button onclick="completeCheckout()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg text-sm transition">
-                                <i class="fa-solid fa-check"></i> إتمام الدفع
+                                <i class="fa-solid fa-check"></i> إتمام الدفع وحفظ الفاتورة
                             </button>
                         </div>
                     </div>
@@ -151,7 +147,54 @@
             </div>
         </section>
 
-        <!-- TAB 2: ITEMS MANAGEMENT -->
+        <!-- TAB 2: INVOICES ARCHIVE & REPORTS -->
+        <section id="tab-invoices" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 space-y-4 transition-colors duration-200">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b dark:border-gray-700 pb-4">
+                    <h2 class="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        <i class="fa-solid fa-book-open text-blue-500"></i> أرشيف الفواتير والتقارير اليومية
+                    </h2>
+                    <!-- Date Filter -->
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <label class="text-xs font-semibold whitespace-nowrap">البحث بالتاريخ:</label>
+                        <input type="date" id="filter-date" onchange="renderInvoicesArchive()" class="border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500">
+                        <button onclick="clearDateFilter()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 px-3 py-1 rounded-lg text-xs">إلغاء الفلتر</button>
+                    </div>
+                </div>
+
+                <!-- Daily Summary Card -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
+                    <div class="flex justify-between items-center px-4">
+                        <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">عدد الفواتير المعروضة:</span>
+                        <span id="report-count" class="text-lg font-bold text-blue-600 dark:text-blue-400">0</span>
+                    </div>
+                    <div class="flex justify-between items-center px-4 border-t md:border-t-0 md:border-r dark:border-gray-700 pt-2 md:pt-0">
+                        <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">إجمالي المبيعات:</span>
+                        <span id="report-total" class="text-lg font-bold text-green-600 dark:text-green-400">0 د.ع</span>
+                    </div>
+                </div>
+
+                <!-- Archived Invoices List Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                <th class="p-3">رقم الفاتورة</th>
+                                <th class="p-3">التاريخ والوقت</th>
+                                <th class="p-3">عدد المواد</th>
+                                <th class="p-3">المبلغ الإجمالي</th>
+                                <th class="p-3 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="archive-invoices-body" class="divide-y dark:divide-gray-700">
+                            <!-- Invoices list -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: ITEMS MANAGEMENT -->
         <section id="tab-items" class="tab-content hidden space-y-6">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 transition-colors duration-200">
                 <h2 id="item-form-title" class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4">إضافة مادة جديدة</h2>
@@ -194,7 +237,6 @@
                 </form>
             </div>
 
-            <!-- Items Table & Name Search -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden transition-colors duration-200">
                 <div class="p-4 border-b dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                     <h3 class="font-bold text-gray-700 dark:text-gray-200">قائمة المواد المخزنة</h3>
@@ -224,7 +266,7 @@
             </div>
         </section>
 
-        <!-- TAB 3: CATEGORIES MANAGEMENT -->
+        <!-- TAB 4: CATEGORIES MANAGEMENT -->
         <section id="tab-categories" class="tab-content hidden space-y-6">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 transition-colors duration-200">
                 <h2 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4">إضافة قسم جديد</h2>
@@ -237,12 +279,12 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-6 transition-colors duration-200">
                 <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4">الأقسام الحالية</h3>
                 <div id="categories-list" class="flex flex-wrap gap-2">
-                    <!-- Categories pills inserted dynamically -->
+                    <!-- Categories -->
                 </div>
             </div>
         </section>
 
-        <!-- TAB 4: BACKUP & SYNC -->
+        <!-- TAB 5: BACKUP & SYNC -->
         <section id="tab-backup" class="tab-content hidden space-y-6">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 space-y-4 transition-colors duration-200">
                 <h2 class="text-lg font-bold text-gray-700 dark:text-gray-200">النسخ الاحتياطي واستعادة البيانات</h2>
@@ -263,11 +305,28 @@
 
     </main>
 
+    <!-- Modal for viewing/editing archived invoice details -->
+    <div id="invoice-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl max-w-lg w-full p-6 space-y-4 shadow-xl border dark:border-gray-700 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3">
+                <h3 id="modal-invoice-title" class="font-bold text-lg">تفاصيل الفاتورة</h3>
+                <button onclick="closeInvoiceModal()" class="text-gray-400 hover:text-gray-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-invoice-content" class="space-y-3">
+                <!-- Details injected -->
+            </div>
+            <div class="flex justify-end pt-3 border-t dark:border-gray-700">
+                <button onclick="closeInvoiceModal()" class="bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg font-semibold text-sm">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
     <!-- App Logic Script -->
     <script>
         let itemsData = JSON.parse(localStorage.getItem('my_inventory_items') || '[]');
         let categoriesData = JSON.parse(localStorage.getItem('my_inventory_categories') || '[]');
         let currentInvoice = JSON.parse(localStorage.getItem('my_current_invoice') || '[]');
+        let archivedInvoices = JSON.parse(localStorage.getItem('my_archived_invoices') || '[]');
         let isDarkMode = localStorage.getItem('my_inventory_dark_mode') === 'true';
 
         window.onload = function() {
@@ -275,6 +334,7 @@
             updateCategoriesUI();
             renderItemsTable();
             renderInvoiceTable();
+            renderInvoicesArchive();
         };
 
         function toggleDarkMode() {
@@ -309,6 +369,11 @@
             renderInvoiceTable();
         }
 
+        function persistArchive() {
+            localStorage.setItem('my_archived_invoices', JSON.stringify(archivedInvoices));
+            renderInvoicesArchive();
+        }
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
@@ -321,17 +386,16 @@
             if(tabId !== 'items') stopItemScanner();
         }
 
-        // --- الفاتورة (Invoice / Cashier Logic) ---
+        // --- الكاشير والفواتير ---
         function handleBarcodeSearch(barcode) {
             barcode = barcode.trim();
             if (!barcode) return;
             const item = itemsData.find(i => i.barcode === barcode);
-            
             if (item) {
                 addItemToInvoice(item);
                 document.getElementById('manual-barcode-input').value = '';
             } else {
-                alert('لم يتم العثور على مادة بهذا الباركود! يرجى إضافتها أولاً من قسم إدارة المواد.');
+                alert('لم يتم العثور على مادة بهذا الباركود!');
             }
         }
 
@@ -383,7 +447,7 @@
             const totalEl = document.getElementById('invoice-total-amount');
 
             if (currentInvoice.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">الفاتورة فارغة حالياً. امسح باركود أو ابحث عن مادة لإضافتها.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">الفاتورة فارغة حالياً.</td></tr>`;
                 totalEl.innerText = '0 د.ع';
                 return;
             }
@@ -442,14 +506,117 @@
                 return;
             }
 
-            alert('تمت عملية الدفع بنجاح! الباقي للعميل: ' + (paidInput - totalAmount).toLocaleString() + ' دينار عراقي.');
+            // حفظ الفاتورة في الأرشيف
+            const now = new Date();
+            const invoiceObj = {
+                id: 'INV_' + Date.now(),
+                dateString: now.toISOString().split('T')[0], // YYYY-MM-DD
+                fullDateTime: now.toLocaleString('ar-IQ'),
+                items: [...currentInvoice],
+                total: totalAmount,
+                paid: paidInput,
+                change: paidInput - totalAmount
+            };
+
+            archivedInvoices.unshift.call(archivedInvoices, invoiceObj);
+            persistArchive();
+
+            alert('تمت عملية الدفع وحفظ الفاتورة بنجاح! الباقي: ' + invoiceObj.change.toLocaleString() + ' د.ع');
             currentInvoice = [];
             persistInvoice();
             document.getElementById('amount-paid').value = '';
             document.getElementById('amount-change').innerText = '0 د.ع';
         }
 
-        // البحث السريع بالإسم لإضافة المنتج للفاتورة مباشرة
+        // --- أرشيف الفواتير والتقارير اليومية ---
+        function renderInvoicesArchive() {
+            const tbody = document.getElementById('archive-invoices-body');
+            const countEl = document.getElementById('report-count');
+            const totalEl = document.getElementById('report-total');
+            const filterDateVal = document.getElementById('filter-date').value;
+
+            let filtered = archivedInvoices;
+            if (filterDateVal) {
+                filtered = archivedInvoices.filter(inv => inv.dateString === filterDateVal);
+            }
+
+            countEl.innerText = filtered.length;
+            let sumTotal = filtered.reduce((acc, inv) => acc + inv.total, 0);
+            totalEl.innerText = sumTotal.toLocaleString() + ' د.ع';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">لا توجد فواتير أرشيفية مطابقة.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(inv => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b dark:border-gray-700 transition-colors">
+                    <td class="p-3 font-mono font-semibold">${inv.id}</td>
+                    <td class="p-3">${inv.fullDateTime}</td>
+                    <td class="p-3">${inv.items.length} مواد</td>
+                    <td class="p-3 font-bold text-blue-600 dark:text-blue-400">${inv.total.toLocaleString()} د.ع</td>
+                    <td class="p-3 text-center space-x-2 space-x-reverse">
+                        <button onclick="viewInvoiceModal('${inv.id}')" class="text-blue-500 hover:text-blue-700" title="عرض وتعديل"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick="deleteArchivedInvoice('${inv.id}')" class="text-red-500 hover:text-red-700" title="حذف الفاتورة"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function clearDateFilter() {
+            document.getElementById('filter-date').value = '';
+            renderInvoicesArchive();
+        }
+
+        function deleteArchivedInvoice(id) {
+            if (confirm('هل أنت متأكد من حذف هذه الفاتورة من الأرشيف؟')) {
+                archivedInvoices = archivedInvoices.filter(i => i.id !== id);
+                persistArchive();
+            }
+        }
+
+        function viewInvoiceModal(id) {
+            const inv = archivedInvoices.find(i => i.id === id);
+            if (!inv) return;
+
+            document.getElementById('modal-invoice-title').innerText = `فاتورة رقم: ${inv.id}`;
+            const content = document.getElementById('modal-invoice-content');
+
+            content.innerHTML = `
+                <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">التاريخ: ${inv.fullDateTime}</div>
+                <table class="w-full text-right text-sm border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 dark:bg-gray-700">
+                            <th class="p-2">المادة</th>
+                            <th class="p-2">السعر</th>
+                            <th class="p-2">الكمية</th>
+                            <th class="p-2">المجموع</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y dark:divide-gray-700">
+                        ${inv.items.map(item => `
+                            <tr>
+                                <td class="p-2">${item.name}</td>
+                                <td class="p-2">${item.price.toLocaleString()}</td>
+                                <td class="p-2">${item.qty}</td>
+                                <td class="p-2 font-bold">${(item.price * item.qty).toLocaleString()} د.ع</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="flex justify-between items-center pt-3 font-bold border-t dark:border-gray-700">
+                    <span>الإجمالي:</span>
+                    <span class="text-blue-600 dark:text-blue-400">${inv.total.toLocaleString()} د.ع</span>
+                </div>
+            `;
+            document.getElementById('invoice-modal').classList.remove('hidden');
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoice-modal').classList.add('hidden');
+        }
+
+        // البحث السريع بالإسم لإضافة المنتج للفاتورة
         function showQuickSuggestions(query) {
             query = query.toLowerCase().trim();
             const box = document.getElementById('quick-suggestions');
@@ -489,12 +656,10 @@
             e.preventDefault();
             const name = document.getElementById('category-name').value.trim();
             if (!name) return;
-            
             if(categoriesData.some(c => c.name === name)) {
                 alert('هذا القسم موجود مسبقاً!');
                 return;
             }
-
             const id = 'cat_' + Date.now();
             categoriesData.push({ id, name });
             persistData();
@@ -506,17 +671,13 @@
         function updateCategoriesUI() {
             const listEl = document.getElementById('categories-list');
             const selectEl = document.getElementById('item-category');
-            
             listEl.innerHTML = categoriesData.map(cat => `
                 <div class="bg-gray-100 dark:bg-gray-700 border dark:border-gray-600 px-3 py-2 rounded-lg flex items-center gap-3">
                     <span class="font-semibold">${cat.name}</span>
                     <button onclick="deleteCategory('${cat.id}')" class="text-red-500 hover:text-red-700 text-xs"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('');
-
-            selectEl.innerHTML = '<option value="">اختر القسم...</option>' + categoriesData.map(cat => `
-                <option value="${cat.name}">${cat.name}</option>
-            `).join('');
+            selectEl.innerHTML = '<option value="">اختر القسم...</option>' + categoriesData.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
         }
 
         function deleteCategory(id) {
@@ -538,21 +699,9 @@
 
             if (editId) {
                 let item = itemsData.find(i => i.id === editId);
-                if (item) {
-                    item.barcode = barcode;
-                    item.name = name;
-                    item.category = category;
-                    item.price = price;
-                }
+                if (item) { item.barcode = barcode; item.name = name; item.category = category; item.price = price; }
             } else {
-                const newItem = {
-                    id: 'item_' + Date.now(),
-                    barcode,
-                    name,
-                    category,
-                    price
-                };
-                itemsData.push(newItem);
+                itemsData.push({ id: 'item_' + Date.now(), barcode, name, category, price });
             }
 
             persistData();
@@ -563,15 +712,8 @@
 
         function renderItemsTable() {
             const tbody = document.getElementById('items-table-body');
-            const searchInput = document.getElementById('search-items');
-            const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-            
-            const filtered = itemsData.filter(item => {
-                const itemName = (item.name || '').toLowerCase();
-                const itemBarcode = (item.barcode || '').toLowerCase();
-                const itemCategory = (item.category || '').toLowerCase();
-                return itemName.includes(query) || itemBarcode.includes(query) || itemCategory.includes(query);
-            });
+            const query = (document.getElementById('search-items')?.value || '').toLowerCase().trim();
+            const filtered = itemsData.filter(item => (item.name || '').toLowerCase().includes(query) || (item.barcode || '').toLowerCase().includes(query) || (item.category || '').toLowerCase().includes(query));
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">لا توجد مواد مطابقة للبحث</td></tr>`;
@@ -621,7 +763,7 @@
             }
         }
 
-        // --- الماسح الضوئي (الكاميرا) ---
+        // --- الماسح الضوئي ---
         let html5QrCode = null;
         let html5QrCodeItem = null;
 
@@ -629,29 +771,22 @@
             fps: 30,
             qrbox: { width: 260, height: 110 },
             formatsToSupport: [ 
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8,
-                Html5QrcodeSupportedFormats.CODE_128,
-                Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.UPC_A,
-                Html5QrcodeSupportedFormats.UPC_E
+                Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E
             ]
         };
 
         function startScanner() {
             if(html5QrCode && html5QrCode.isScanning) return;
             html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start(
-                { facingMode: "environment" },
-                fastScannerConfig,
-                (decodedText) => {
-                    handleBarcodeSearch(decodedText);
-                    document.getElementById('manual-barcode-input').value = decodedText;
-                }
-            ).then(() => {
+            html5QrCode.start({ facingMode: "environment" }, fastScannerConfig, (decodedText) => {
+                handleBarcodeSearch(decodedText);
+                document.getElementById('manual-barcode-input').value = decodedText;
+            }).then(() => {
                 document.getElementById('start-camera').classList.add('hidden');
                 document.getElementById('stop-camera').classList.remove('hidden');
-            }).catch(err => alert("تعذر تشغيل الكاميرا. تأكد من إعطاء الصلاحيات."));
+            }).catch(err => alert("تعذر تشغيل الكاميرا."));
         }
 
         function stopScanner() {
@@ -669,21 +804,12 @@
             if(html5QrCodeItem && html5QrCodeItem.isScanning) return;
 
             html5QrCodeItem = new Html5Qrcode("item-reader");
-            html5QrCodeItem.start(
-                { facingMode: "environment" },
-                fastScannerConfig,
-                (decodedText) => {
-                    document.getElementById('item-barcode').value = decodedText;
-                    stopItemScanner();
-                }
-            ).catch(err => {
-                html5QrCodeItem.start({ facingMode: "environment" }, { fps: 20, qrbox: 200 }, (text) => {
-                    document.getElementById('item-barcode').value = text;
-                    stopItemScanner();
-                }).catch(e => {
-                    alert("تعذر تشغيل الكاميرا في نموذج الإضافة.");
-                    container.classList.add('hidden');
-                });
+            html5QrCodeItem.start({ facingMode: "environment" }, fastScannerConfig, (decodedText) => {
+                document.getElementById('item-barcode').value = decodedText;
+                stopItemScanner();
+            }).catch(e => {
+                alert("تعذر تشغيل الكاميرا في نموذج الإضافة.");
+                container.classList.add('hidden');
             });
         }
 
@@ -699,11 +825,12 @@
             }
         }
 
-        // --- النسخ الاحتياطي (Backup Export & Import) ---
+        // --- النسخ الاحتياطي ---
         function exportBackup() {
             const backupData = {
                 items: itemsData,
                 categories: categoriesData,
+                archivedInvoices: archivedInvoices,
                 exportDate: new Date().toISOString()
             };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
@@ -723,18 +850,20 @@
                 try {
                     const content = JSON.parse(e.target.result);
                     if (content.items && content.categories) {
-                        if (confirm('هل أنت متأكد من استعادة النسخة الاحتياطية؟ سيتم دمج البيانات الجديدة مع البيانات الحالية.')) {
+                        if (confirm('هل أنت متأكد من استعادة النسخة الاحتياطية؟ سيتم دمج البيانات.')) {
                             content.items.forEach(newItem => {
-                                if(!itemsData.some(i => i.id === newItem.id || i.barcode === newItem.barcode)) {
-                                    itemsData.push(newItem);
-                                }
+                                if(!itemsData.some(i => i.id === newItem.id || i.barcode === newItem.barcode)) itemsData.push(newItem);
                             });
                             content.categories.forEach(newCat => {
-                                if(!categoriesData.some(c => c.name === newCat.name)) {
-                                    categoriesData.push(newCat);
-                                }
+                                if(!categoriesData.some(c => c.name === newCat.name)) categoriesData.push(newCat);
                             });
+                            if(content.archivedInvoices) {
+                                content.archivedInvoices.forEach(inv => {
+                                    if(!archivedInvoices.some(i => i.id === inv.id)) archivedInvoices.push(inv);
+                                });
+                            }
                             persistData();
+                            persistArchive();
                             updateCategoriesUI();
                             renderItemsTable();
                             alert('تمت استعادة ودمج النسخة الاحتياطية بنجاح!');
