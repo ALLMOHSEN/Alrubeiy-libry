@@ -153,12 +153,12 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden transition-colors duration-200">
                 <div class="p-4 border-b dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                     <h3 class="font-bold text-gray-700 dark:text-gray-200">قائمة المواد المخزنة</h3>
-                    <!-- Search by name/barcode/category input -->
+                    <!-- Search by name input -->
                     <div class="relative w-full md:w-72">
                         <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </span>
-                        <input type="text" id="search-items" oninput="renderItemsTable()" placeholder="ابحث باسم المادة، الباركود، القسم..." class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg pr-9 pl-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="search-items" oninput="renderItemsTable()" placeholder="ابحث باسم المادة، الباركود..." class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg pr-9 pl-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -221,7 +221,6 @@
 
     <!-- App Logic Script -->
     <script>
-        // تحميل البيانات والوضع الداكن من الذاكرة المحلية
         let itemsData = JSON.parse(localStorage.getItem('my_inventory_items') || '[]');
         let categoriesData = JSON.parse(localStorage.getItem('my_inventory_categories') || '[]');
         let isDarkMode = localStorage.getItem('my_inventory_dark_mode') === 'true';
@@ -232,7 +231,6 @@
             renderItemsTable();
         };
 
-        // --- نظام الوضع الداكن ---
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
             localStorage.setItem('my_inventory_dark_mode', isDarkMode);
@@ -255,7 +253,6 @@
             }
         }
 
-        // حفظ البيانات في الذاكرة المحلية
         function persistData() {
             localStorage.setItem('my_inventory_items', JSON.stringify(itemsData));
             localStorage.setItem('my_inventory_categories', JSON.stringify(categoriesData));
@@ -350,16 +347,25 @@
             alert('تم حفظ المادة بنجاح!');
         }
 
-        // --- خاصية البحث عن المادة (بالاسم، الباركود، أو القسم) ---
+        // --- دالة البحث المحدثة والفعالة عن اسم المادة أو الباركود ---
         function renderItemsTable() {
             const tbody = document.getElementById('items-table-body');
-            const query = document.getElementById('search-items').value.toLowerCase().trim();
+            const searchInput = document.getElementById('search-items');
+            const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
             
-            const filtered = itemsData.filter(i => 
-                i.name.toLowerCase().includes(query) || 
-                i.barcode.toLowerCase().includes(query) || 
-                i.category.toLowerCase().includes(query)
-            );
+            // فلترة المواد بناءً على مطابقة الاسم أو الباركود أو القسم
+            const filtered = itemsData.filter(item => {
+                const itemName = (item.name || '').toLowerCase();
+                const itemBarcode = (item.barcode || '').toLowerCase();
+                const itemCategory = (item.category || '').toLowerCase();
+                
+                return itemName.includes(query) || itemBarcode.includes(query) || itemCategory.includes(query);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">لا توجد مواد مطابقة للبحث</td></tr>`;
+                return;
+            }
 
             tbody.innerHTML = filtered.map(item => `
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b dark:border-gray-700 transition-colors">
