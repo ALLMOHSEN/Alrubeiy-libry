@@ -18,6 +18,27 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
         body { font-family: 'Cairo', sans-serif; }
+
+        /* تنسيق خاص لطباعة طابعة الكاشير الحرارية */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printable-receipt, #printable-receipt * {
+                visibility: visible;
+            }
+            #printable-receipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                direction: rtl;
+                background: white;
+                color: black;
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
@@ -71,7 +92,7 @@
                 </h2>
                 
                 <div class="flex gap-2">
-                    <input type="text" id="manual-barcode-input" placeholder="أدخل أو امسحه الباركود لإضافته للفاتورة..." class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="manual-barcode-input" placeholder="أدخل أو امسح الباركود لإضافته للفاتورة..." class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <button onclick="handleBarcodeSearch(document.getElementById('manual-barcode-input').value)" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition">
                         إضافة للفاتورة
                     </button>
@@ -137,9 +158,12 @@
                             <span class="text-xs text-gray-500 dark:text-gray-400">المتبقي (الباقي)</span>
                             <span id="amount-change" class="text-md font-bold text-green-600 dark:text-green-400">0 د.ع</span>
                         </div>
-                        <div class="flex items-end">
-                            <button onclick="completeCheckout()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg text-sm transition">
-                                <i class="fa-solid fa-check"></i> إتمام الدفع وحفظ الفاتورة
+                        <div class="flex items-end gap-2">
+                            <button onclick="printCurrentInvoice()" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg text-sm transition" title="طباعة الفاتورة لطابعة الكاشير">
+                                <i class="fa-solid fa-print"></i>
+                            </button>
+                            <button onclick="completeCheckout()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg text-sm transition">
+                                <i class="fa-solid fa-check"></i> إتمام الدفع وحفظ
                             </button>
                         </div>
                     </div>
@@ -154,18 +178,28 @@
                     <h2 class="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
                         <i class="fa-solid fa-book-open text-blue-500"></i> أرشيف الفواتير والتقارير اليومية
                     </h2>
-                    <!-- Date Filter -->
-                    <div class="flex items-center gap-2 w-full md:w-auto">
-                        <label class="text-xs font-semibold whitespace-nowrap">البحث بالتاريخ:</label>
+                    
+                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                        <label class="text-xs font-semibold whitespace-nowrap">التاريخ:</label>
                         <input type="date" id="filter-date" onchange="renderInvoicesArchive()" class="border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500">
                         <button onclick="clearDateFilter()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 px-3 py-1 rounded-lg text-xs">إلغاء الفلتر</button>
                     </div>
                 </div>
 
+                <!-- Export Reports Action Bar -->
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <button onclick="exportReport('filtered')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition">
+                        <i class="fa-solid fa-file-arrow-down"></i> استخراج تقرير التاريخ المحدد (ملف)
+                    </button>
+                    <button onclick="exportReport('all')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition">
+                        <i class="fa-solid fa-file-zipper"></i> استخراج جميع التقارير (ملف شامل)
+                    </button>
+                </div>
+
                 <!-- Daily Summary Card -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
                     <div class="flex justify-between items-center px-4">
-                        <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">عدد الفواتير المعروضة:</span>
+                        <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">عدد الفواتير:</span>
                         <span id="report-count" class="text-lg font-bold text-blue-600 dark:text-blue-400">0</span>
                     </div>
                     <div class="flex justify-between items-center px-4 border-t md:border-t-0 md:border-r dark:border-gray-700 pt-2 md:pt-0">
@@ -174,7 +208,6 @@
                     </div>
                 </div>
 
-                <!-- Archived Invoices List Table -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-right border-collapse text-sm">
                         <thead>
@@ -278,9 +311,7 @@
 
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-6 transition-colors duration-200">
                 <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4">الأقسام الحالية</h3>
-                <div id="categories-list" class="flex flex-wrap gap-2">
-                    <!-- Categories -->
-                </div>
+                <div id="categories-list" class="flex flex-wrap gap-2"></div>
             </div>
         </section>
 
@@ -305,17 +336,41 @@
 
     </main>
 
-    <!-- Modal for viewing/editing archived invoice details -->
+    <!-- Hidden Printable Receipt Container for Thermal Printer -->
+    <div id="printable-receipt" class="hidden">
+        <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">فاتورة مبيعات</div>
+        <div id="receipt-date-time" style="text-align: center; margin-bottom: 10px; font-size: 10px;"></div>
+        <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 5px 0; margin-bottom: 5px;">
+            <table style="width: 100%; font-size: 11px; text-align: right; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>المادة</th>
+                        <th style="text-align: center;">كمية</th>
+                        <th style="text-align: left;">المجموع</th>
+                    </tr>
+                </thead>
+                <tbody id="receipt-items-print"></tbody>
+            </table>
+        </div>
+        <div style="font-size: 12px; font-weight: bold; display: flex; justify-content: space-between;">
+            <span>المجموع:</span>
+            <span id="receipt-total-print">0 د.ع</span>
+        </div>
+        <div style="text-align: center; margin-top: 15px; font-size: 10px;">شكراً لزيارتكم!</div>
+    </div>
+
+    <!-- Modal for viewing archived invoice details -->
     <div id="invoice-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-gray-800 rounded-xl max-w-lg w-full p-6 space-y-4 shadow-xl border dark:border-gray-700 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3">
                 <h3 id="modal-invoice-title" class="font-bold text-lg">تفاصيل الفاتورة</h3>
                 <button onclick="closeInvoiceModal()" class="text-gray-400 hover:text-gray-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="modal-invoice-content" class="space-y-3">
-                <!-- Details injected -->
-            </div>
-            <div class="flex justify-end pt-3 border-t dark:border-gray-700">
+            <div id="modal-invoice-content" class="space-y-3"></div>
+            <div class="flex justify-between items-center pt-3 border-t dark:border-gray-700">
+                <button onclick="printArchivedInvoice()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold text-sm">
+                    <i class="fa-solid fa-print"></i> طباعة الفاتورة
+                </button>
                 <button onclick="closeInvoiceModal()" class="bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg font-semibold text-sm">إغلاق</button>
             </div>
         </div>
@@ -328,6 +383,7 @@
         let currentInvoice = JSON.parse(localStorage.getItem('my_current_invoice') || '[]');
         let archivedInvoices = JSON.parse(localStorage.getItem('my_archived_invoices') || '[]');
         let isDarkMode = localStorage.getItem('my_inventory_dark_mode') === 'true';
+        let activeModalInvoice = null;
 
         window.onload = function() {
             applyDarkModePreference();
@@ -506,11 +562,10 @@
                 return;
             }
 
-            // حفظ الفاتورة في الأرشيف
             const now = new Date();
             const invoiceObj = {
                 id: 'INV_' + Date.now(),
-                dateString: now.toISOString().split('T')[0], // YYYY-MM-DD
+                dateString: now.toISOString().split('T')[0],
                 fullDateTime: now.toLocaleString('ar-IQ'),
                 items: [...currentInvoice],
                 total: totalAmount,
@@ -518,7 +573,7 @@
                 change: paidInput - totalAmount
             };
 
-            archivedInvoices.unshift.call(archivedInvoices, invoiceObj);
+            archivedInvoices.unshift(invoiceObj);
             persistArchive();
 
             alert('تمت عملية الدفع وحفظ الفاتورة بنجاح! الباقي: ' + invoiceObj.change.toLocaleString() + ' د.ع');
@@ -528,7 +583,47 @@
             document.getElementById('amount-change').innerText = '0 د.ع';
         }
 
-        // --- أرشيف الفواتير والتقارير اليومية ---
+        // --- طباعة الفاتورة لطابعة الكاشير ---
+        function printCurrentInvoice() {
+            if (currentInvoice.length === 0) {
+                alert('الفاتورة فارغة للطباعة!');
+                return;
+            }
+            const totalText = document.getElementById('invoice-total-amount').innerText;
+            document.getElementById('receipt-date-time').innerText = new Date().toLocaleString('ar-IQ');
+            
+            const tbodyPrint = document.getElementById('receipt-items-print');
+            tbodyPrint.innerHTML = currentInvoice.map(i => `
+                <tr>
+                    <td>${i.name} (${i.qty})</td>
+                    <td style="text-align: center;">${i.qty}</td>
+                    <td style="text-align: left;">${(i.price * i.qty).toLocaleString()}</td>
+                </tr>
+            `).join('');
+            document.getElementById('receipt-total-print').innerText = totalText;
+
+            window.print();
+        }
+
+        function printArchivedInvoice() {
+            if (!activeModalInvoice) return;
+            const inv = activeModalInvoice;
+            document.getElementById('receipt-date-time').innerText = inv.fullDateTime;
+            
+            const tbodyPrint = document.getElementById('receipt-items-print');
+            tbodyPrint.innerHTML = inv.items.map(i => `
+                <tr>
+                    <td>${i.name} (${i.qty})</td>
+                    <td style="text-align: center;">${i.qty}</td>
+                    <td style="text-align: left;">${(i.price * i.qty).toLocaleString()}</td>
+                </tr>
+            `).join('');
+            document.getElementById('receipt-total-print').innerText = inv.total.toLocaleString() + ' د.ع';
+
+            window.print();
+        }
+
+        // --- أرشيف الفواتير والتقارير اليومية وتصديرها كملفات ---
         function renderInvoicesArchive() {
             const tbody = document.getElementById('archive-invoices-body');
             const countEl = document.getElementById('report-count');
@@ -575,9 +670,47 @@
             }
         }
 
+        // استخراج التقارير كملفات
+        function exportReport(type) {
+            const filterDateVal = document.getElementById('filter-date').value;
+            let dataToExport = archivedInvoices;
+            let fileName = `all_reports_${Date.now()}.json`;
+
+            if (type === 'filtered') {
+                if (!filterDateVal) {
+                    alert('يرجى اختيار تاريخ محدد أولاً من حقل البحث بالتاريخ!');
+                    return;
+                }
+                dataToExport = archivedInvoices.filter(inv => inv.dateString === filterDateVal);
+                fileName = `report_${filterDateVal}_${Date.now()}.json`;
+            }
+
+            if (dataToExport.length === 0) {
+                alert('لا توجد تقارير لتصديرها!');
+                return;
+            }
+
+            const reportData = {
+                exportType: type === 'filtered' ? `Daily Report (${filterDateVal})` : 'All Reports',
+                exportDate: new Date().toISOString(),
+                totalInvoices: dataToExport.length,
+                totalRevenue: dataToExport.reduce((acc, inv) => acc + inv.total, 0),
+                invoices: dataToExport
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", fileName);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
         function viewInvoiceModal(id) {
             const inv = archivedInvoices.find(i => i.id === id);
             if (!inv) return;
+            activeModalInvoice = inv;
 
             document.getElementById('modal-invoice-title').innerText = `فاتورة رقم: ${inv.id}`;
             const content = document.getElementById('modal-invoice-content');
@@ -614,9 +747,9 @@
 
         function closeInvoiceModal() {
             document.getElementById('invoice-modal').classList.add('hidden');
+            activeModalInvoice = null;
         }
 
-        // البحث السريع بالإسم لإضافة المنتج للفاتورة
         function showQuickSuggestions(query) {
             query = query.toLowerCase().trim();
             const box = document.getElementById('quick-suggestions');
