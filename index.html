@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة المواد والأسعار</title>
+    <title>نظام إدارة المواد والفواتير</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -26,7 +26,7 @@
     <header class="bg-blue-600 dark:bg-gray-800 text-white shadow-md transition-colors duration-200">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <h1 class="text-xl font-bold flex items-center gap-2">
-                <i class="fa-solid fa-barcode"></i> نظام إدارة المواد والأسعار
+                <i class="fa-solid fa-cash-register"></i> نظام إدارة المواد والفواتير
             </h1>
             <div class="flex items-center gap-3">
                 <!-- Dark Mode Toggle Button -->
@@ -44,7 +44,7 @@
     <nav class="bg-white dark:bg-gray-800 shadow border-b dark:border-gray-700 transition-colors duration-200">
         <div class="container mx-auto px-4 flex gap-2 overflow-x-auto">
             <button onclick="switchTab('scanner')" id="btn-scanner" class="tab-btn px-4 py-3 font-semibold border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 flex items-center gap-2 whitespace-nowrap">
-                <i class="fa-solid fa-camera"></i> القارئ والبحث السريع
+                <i class="fa-solid fa-cash-register"></i> القارئ والفاتورة (الكاشير)
             </button>
             <button onclick="switchTab('items')" id="btn-items" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 dark:text-gray-300 flex items-center gap-2 whitespace-nowrap">
                 <i class="fa-solid fa-boxes-stacked"></i> إدارة المواد
@@ -61,20 +61,28 @@
     <!-- Main Container -->
     <main class="container mx-auto px-4 py-6 max-w-4xl">
 
-        <!-- TAB 1: SCANNER & LOOKUP -->
+        <!-- TAB 1: SCANNER & INVOICE (CASHIER) -->
         <section id="tab-scanner" class="tab-content space-y-6">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 space-y-4 transition-colors duration-200">
                 <h2 class="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
-                    <i class="fa-solid fa-qrcode text-blue-600 dark:text-blue-400"></i> قراءة الباركود أو الإدخال اليدوي للبحث
+                    <i class="fa-solid fa-qrcode text-blue-600 dark:text-blue-400"></i> قارئ الباركود وإضافة المواد للفاتورة
                 </h2>
                 
+                <!-- Barcode Search Input -->
                 <div class="flex gap-2">
-                    <input type="text" id="manual-barcode-input" placeholder="أدخل رقم الباركود أو امسحه..." class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="searchByBarcode(document.getElementById('manual-barcode-input').value)" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition">
-                        بحث
+                    <input type="text" id="manual-barcode-input" placeholder="أدخل أو امسح الباركود لإضافته للفاتورة..." class="flex-1 border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="handleBarcodeSearch(document.getElementById('manual-barcode-input').value)" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition">
+                        إضافة للفاتورة
                     </button>
                 </div>
 
+                <!-- Search Item by Name for Invoice Quick Add -->
+                <div class="relative">
+                    <input type="text" id="quick-name-search" oninput="showQuickSuggestions(this.value)" placeholder="أو ابحث عن اسم المادة للإضافة السريعة..." class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                    <div id="quick-suggestions" class="absolute z-10 w-full bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg mt-1 shadow-lg hidden max-h-48 overflow-y-auto"></div>
+                </div>
+
+                <!-- Camera Container -->
                 <div class="border dark:border-gray-700 rounded-xl p-4 bg-gray-50 dark:bg-gray-900 text-center">
                     <div id="reader" class="w-full max-w-md mx-auto rounded-lg overflow-hidden"></div>
                     <button id="start-camera" onclick="startScanner()" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
@@ -86,20 +94,58 @@
                 </div>
             </div>
 
-            <div id="scan-result" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 hidden transition-colors duration-200">
-                <h3 class="text-md font-semibold text-gray-500 dark:text-gray-400 mb-4 border-b dark:border-gray-700 pb-2">معلومات المادة</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div class="bg-blue-50 dark:bg-gray-700 p-4 rounded-lg">
-                        <span class="block text-xs text-gray-500 dark:text-gray-300 mb-1">اسم المادة</span>
-                        <span id="res-name" class="text-lg font-bold text-blue-900 dark:text-blue-300">-</span>
+            <!-- INVOICE SECTION (الفاتورة) -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 space-y-4 transition-colors duration-200">
+                <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3">
+                    <h3 class="text-md font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice-dollar text-green-500"></i> تفاصيل الفاتورة الحالية
+                    </h3>
+                    <button onclick="clearInvoice()" class="text-red-500 hover:text-red-700 text-xs font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> تفريغ الفاتورة
+                    </button>
+                </div>
+
+                <!-- Invoice Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                <th class="p-2.5 w-12 text-center">ت</th>
+                                <th class="p-2.5">المادة</th>
+                                <th class="p-2.5">السعر (د.ع)</th>
+                                <th class="p-2.5 w-28 text-center">الكمية</th>
+                                <th class="p-2.5">المجموع (د.ع)</th>
+                                <th class="p-2.5 text-center">إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoice-items-body" class="divide-y dark:divide-gray-700">
+                            <!-- Invoice rows will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Invoice Totals & Checkout -->
+                <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700 space-y-3">
+                    <div class="flex justify-between items-center text-lg font-bold">
+                        <span>المجموع الإجمالي:</span>
+                        <span id="invoice-total-amount" class="text-blue-600 dark:text-blue-400">0 د.ع</span>
                     </div>
-                    <div class="bg-green-50 dark:bg-gray-700 p-4 rounded-lg">
-                        <span class="block text-xs text-gray-500 dark:text-gray-300 mb-1">القسم / التصنيف</span>
-                        <span id="res-category" class="text-lg font-bold text-green-900 dark:text-green-300">-</span>
-                    </div>
-                    <div class="bg-amber-50 dark:bg-gray-700 p-4 rounded-lg">
-                        <span class="block text-xs text-gray-500 dark:text-gray-300 mb-1">السعر</span>
-                        <span id="res-price" class="text-lg font-bold text-amber-900 dark:text-amber-300">-</span>
+
+                    <!-- Payment & Change Calculator -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t dark:border-gray-800">
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">المبلغ المدفوع (د.ع)</label>
+                            <input type="number" id="amount-paid" oninput="calculateChange()" placeholder="أدخل المبلغ..." class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="bg-blue-50 dark:bg-gray-800 p-2.5 rounded-lg text-center flex flex-col justify-center">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">المتبقي (الباقي)</span>
+                            <span id="amount-change" class="text-md font-bold text-green-600 dark:text-green-400">0 د.ع</span>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="completeCheckout()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg text-sm transition">
+                                <i class="fa-solid fa-check"></i> إتمام الدفع
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -110,7 +156,6 @@
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700 transition-colors duration-200">
                 <h2 id="item-form-title" class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4">إضافة مادة جديدة</h2>
                 
-                <!-- Camera modal for adding item -->
                 <div id="item-scanner-container" class="mb-4 border dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-gray-900 text-center hidden">
                     <div id="item-reader" class="w-full max-w-sm mx-auto rounded-lg overflow-hidden"></div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">وجّه الكاميرا نحو باركود المادة للقراءة الفورية</p>
@@ -139,7 +184,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1">السعر</label>
+                        <label class="block text-sm font-semibold mb-1">السعر (د.ع)</label>
                         <input type="number" step="0.01" id="item-price" required class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="md:col-span-2 flex gap-2">
@@ -153,7 +198,6 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden transition-colors duration-200">
                 <div class="p-4 border-b dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                     <h3 class="font-bold text-gray-700 dark:text-gray-200">قائمة المواد المخزنة</h3>
-                    <!-- Search by name input -->
                     <div class="relative w-full md:w-72">
                         <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
                             <i class="fa-solid fa-magnifying-glass"></i>
@@ -168,7 +212,7 @@
                                 <th class="p-3">الباركود</th>
                                 <th class="p-3">اسم المادة</th>
                                 <th class="p-3">القسم</th>
-                                <th class="p-3">السعر</th>
+                                <th class="p-3">السعر (د.ع)</th>
                                 <th class="p-3 text-center">إجراءات</th>
                             </tr>
                         </thead>
@@ -223,12 +267,14 @@
     <script>
         let itemsData = JSON.parse(localStorage.getItem('my_inventory_items') || '[]');
         let categoriesData = JSON.parse(localStorage.getItem('my_inventory_categories') || '[]');
+        let currentInvoice = JSON.parse(localStorage.getItem('my_current_invoice') || '[]');
         let isDarkMode = localStorage.getItem('my_inventory_dark_mode') === 'true';
 
         window.onload = function() {
             applyDarkModePreference();
             updateCategoriesUI();
             renderItemsTable();
+            renderInvoiceTable();
         };
 
         function toggleDarkMode() {
@@ -258,6 +304,11 @@
             localStorage.setItem('my_inventory_categories', JSON.stringify(categoriesData));
         }
 
+        function persistInvoice() {
+            localStorage.setItem('my_current_invoice', JSON.stringify(currentInvoice));
+            renderInvoiceTable();
+        }
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
@@ -268,6 +319,169 @@
             document.getElementById('btn-' + tabId).classList.add('border-blue-600', 'text-blue-600', 'dark:text-blue-400');
             if(tabId !== 'scanner') stopScanner();
             if(tabId !== 'items') stopItemScanner();
+        }
+
+        // --- الفاتورة (Invoice / Cashier Logic) ---
+        function handleBarcodeSearch(barcode) {
+            barcode = barcode.trim();
+            if (!barcode) return;
+            const item = itemsData.find(i => i.barcode === barcode);
+            
+            if (item) {
+                addItemToInvoice(item);
+                document.getElementById('manual-barcode-input').value = '';
+            } else {
+                alert('لم يتم العثور على مادة بهذا الباركود! يرجى إضافتها أولاً من قسم إدارة المواد.');
+            }
+        }
+
+        function addItemToInvoice(item) {
+            const existingIndex = currentInvoice.findIndex(i => i.id === item.id);
+            if (existingIndex > -1) {
+                currentInvoice[existingIndex].qty += 1;
+            } else {
+                currentInvoice.push({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    qty: 1
+                });
+            }
+            persistInvoice();
+        }
+
+        function updateInvoiceQty(id, newQty) {
+            newQty = parseInt(newQty);
+            const item = currentInvoice.find(i => i.id === id);
+            if (item) {
+                if (newQty <= 0) {
+                    removeFromInvoice(id);
+                } else {
+                    item.qty = newQty;
+                    persistInvoice();
+                }
+            }
+        }
+
+        function removeFromInvoice(id) {
+            currentInvoice = currentInvoice.filter(i => i.id !== id);
+            persistInvoice();
+        }
+
+        function clearInvoice() {
+            if (currentInvoice.length === 0) return;
+            if (confirm('هل أنت متأكد من تفريغ الفاتورة؟')) {
+                currentInvoice = [];
+                persistInvoice();
+                document.getElementById('amount-paid').value = '';
+                document.getElementById('amount-change').innerText = '0 د.ع';
+            }
+        }
+
+        function renderInvoiceTable() {
+            const tbody = document.getElementById('invoice-items-body');
+            const totalEl = document.getElementById('invoice-total-amount');
+
+            if (currentInvoice.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">الفاتورة فارغة حالياً. امسح باركود أو ابحث عن مادة لإضافتها.</td></tr>`;
+                totalEl.innerText = '0 د.ع';
+                return;
+            }
+
+            let grandTotal = 0;
+            tbody.innerHTML = currentInvoice.map((item, index) => {
+                const totalItemPrice = item.price * item.qty;
+                grandTotal += totalItemPrice;
+                return `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b dark:border-gray-700 transition-colors">
+                        <td class="p-2.5 text-center font-mono">${index + 1}</td>
+                        <td class="p-2.5 font-semibold">${item.name}</td>
+                        <td class="p-2.5">${item.price.toLocaleString()}</td>
+                        <td class="p-2.5 text-center">
+                            <input type="number" min="1" value="${item.qty}" onchange="updateInvoiceQty('${item.id}', this.value)" class="w-16 border dark:border-gray-600 bg-white dark:bg-gray-700 text-center rounded px-1 py-0.5 text-sm">
+                        </td>
+                        <td class="p-2.5 font-bold text-blue-600 dark:text-blue-400">${totalItemPrice.toLocaleString()} د.ع</td>
+                        <td class="p-2.5 text-center">
+                            <button onclick="removeFromInvoice('${item.id}')" class="text-red-500 hover:text-red-700" title="حذف المنتج"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            totalEl.innerText = grandTotal.toLocaleString() + ' د.ع';
+            calculateChange();
+        }
+
+        function calculateChange() {
+            const totalText = document.getElementById('invoice-total-amount').innerText;
+            const totalAmount = parseFloat(totalText.replace(/[^0-9.-]+/g, "")) || 0;
+            const paidInput = parseFloat(document.getElementById('amount-paid').value) || 0;
+            const changeEl = document.getElementById('amount-change');
+
+            const change = paidInput - totalAmount;
+            if (change >= 0) {
+                changeEl.innerText = change.toLocaleString() + ' د.ع';
+                changeEl.className = 'text-md font-bold text-green-600 dark:text-green-400';
+            } else {
+                changeEl.innerText = 'المبلغ غير كافٍ (' + Math.abs(change).toLocaleString() + ' ناقص)';
+                changeEl.className = 'text-md font-bold text-red-500';
+            }
+        }
+
+        function completeCheckout() {
+            if (currentInvoice.length === 0) {
+                alert('الفاتورة فارغة!');
+                return;
+            }
+            const totalText = document.getElementById('invoice-total-amount').innerText;
+            const totalAmount = parseFloat(totalText.replace(/[^0-9.-]+/g, "")) || 0;
+            const paidInput = parseFloat(document.getElementById('amount-paid').value) || 0;
+
+            if (paidInput < totalAmount) {
+                alert('المبلغ المدفوع أقل من إجمالي الفاتورة!');
+                return;
+            }
+
+            alert('تمت عملية الدفع بنجاح! الباقي للعميل: ' + (paidInput - totalAmount).toLocaleString() + ' دينار عراقي.');
+            currentInvoice = [];
+            persistInvoice();
+            document.getElementById('amount-paid').value = '';
+            document.getElementById('amount-change').innerText = '0 د.ع';
+        }
+
+        // البحث السريع بالإسم لإضافة المنتج للفاتورة مباشرة
+        function showQuickSuggestions(query) {
+            query = query.toLowerCase().trim();
+            const box = document.getElementById('quick-suggestions');
+            if (!query) {
+                box.classList.add('hidden');
+                box.innerHTML = '';
+                return;
+            }
+
+            const matched = itemsData.filter(i => i.name.toLowerCase().includes(query) || i.barcode.includes(query));
+            if (matched.length === 0) {
+                box.innerHTML = `<div class="p-2 text-xs text-gray-400">لا توجد مواد مطابقة</div>`;
+                box.classList.remove('hidden');
+                return;
+            }
+
+            box.innerHTML = matched.map(item => `
+                <div onclick="selectQuickItem('${item.id}')" class="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex justify-between items-center text-sm border-b dark:border-gray-600">
+                    <span class="font-semibold">${item.name}</span>
+                    <span class="text-blue-600 dark:text-blue-400 font-bold">${item.price.toLocaleString()} د.ع</span>
+                </div>
+            `).join('');
+            box.classList.remove('hidden');
+        }
+
+        function selectQuickItem(id) {
+            const item = itemsData.find(i => i.id === id);
+            if (item) {
+                addItemToInvoice(item);
+                document.getElementById('quick-name-search').value = '';
+                document.getElementById('quick-suggestions').classList.add('hidden');
+            }
         }
 
         // --- الأقسام ---
@@ -347,18 +561,15 @@
             alert('تم حفظ المادة بنجاح!');
         }
 
-        // --- دالة البحث المحدثة والفعالة عن اسم المادة أو الباركود ---
         function renderItemsTable() {
             const tbody = document.getElementById('items-table-body');
             const searchInput = document.getElementById('search-items');
             const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
             
-            // فلترة المواد بناءً على مطابقة الاسم أو الباركود أو القسم
             const filtered = itemsData.filter(item => {
                 const itemName = (item.name || '').toLowerCase();
                 const itemBarcode = (item.barcode || '').toLowerCase();
                 const itemCategory = (item.category || '').toLowerCase();
-                
                 return itemName.includes(query) || itemBarcode.includes(query) || itemCategory.includes(query);
             });
 
@@ -372,7 +583,7 @@
                     <td class="p-3 font-mono">${item.barcode}</td>
                     <td class="p-3 font-semibold">${item.name}</td>
                     <td class="p-3"><span class="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 text-xs px-2 py-1 rounded">${item.category}</span></td>
-                    <td class="p-3 text-blue-600 dark:text-blue-400 font-bold">${item.price}</td>
+                    <td class="p-3 text-blue-600 dark:text-blue-400 font-bold">${item.price.toLocaleString()} د.ع</td>
                     <td class="p-3 text-center space-x-2 space-x-reverse">
                         <button onclick="editItem('${item.id}')" class="text-blue-500 hover:text-blue-700" title="تعديل"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700" title="حذف"><i class="fa-solid fa-trash"></i></button>
@@ -410,24 +621,7 @@
             }
         }
 
-        // --- البحث الفوري بالباركود في التبويب الأول ---
-        function searchByBarcode(code) {
-            code = code.trim();
-            if (!code) return;
-            const item = itemsData.find(i => i.barcode === code);
-            const resultBox = document.getElementById('scan-result');
-            
-            if (item) {
-                document.getElementById('res-name').innerText = item.name;
-                document.getElementById('res-category').innerText = item.category;
-                document.getElementById('res-price').innerText = item.price;
-                resultBox.classList.remove('hidden');
-            } else {
-                alert('لم يتم العثور على مادة بهذا الباركود!');
-                resultBox.classList.add('hidden');
-            }
-        }
-
+        // --- الماسح الضوئي (الكاميرا) ---
         let html5QrCode = null;
         let html5QrCodeItem = null;
 
@@ -451,9 +645,8 @@
                 { facingMode: "environment" },
                 fastScannerConfig,
                 (decodedText) => {
+                    handleBarcodeSearch(decodedText);
                     document.getElementById('manual-barcode-input').value = decodedText;
-                    searchByBarcode(decodedText);
-                    stopScanner();
                 }
             ).then(() => {
                 document.getElementById('start-camera').classList.add('hidden');
