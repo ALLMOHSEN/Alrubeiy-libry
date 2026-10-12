@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المواد والأسعار السحابي</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- HTML5 QR Code Scanner -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-time-screen">
+
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-barcode"></i> نظام إدارة المواد والأسعار
+            </h1>
+            <div id="sync-status" class="text-xs bg-blue-700 px-3 py-1 rounded-full flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-yellow-400 inline-block animate-pulse"></span> جاري الاتصال بالسحاب...
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white shadow border-b">
+        <div class="container mx-auto px-4 flex gap-2 overflow-x-auto">
+            <button onclick="switchTab('scanner')" id="btn-scanner" class="tab-btn px-4 py-3 font-semibold border-b-2 border-blue-600 text-blue-600 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-camera"></i> القارئ والبحث
+            </button>
+            <button onclick="switchTab('items')" id="btn-items" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-boxes-stacked"></i> إدارة المواد
+            </button>
+            <button onclick="switchTab('categories')" id="btn-categories" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-layer-group"></i> الأقسام
+            </button>
+            <button onclick="switchTab('backup')" id="btn-backup" class="tab-btn px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-database"></i> النسخ الاحتياطي
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-6 max-w-4xl">
+
+        <!-- TAB 1: SCANNER & LOOKUP -->
+        <section id="tab-scanner" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                <h2 class="text-lg font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fa-solid fa-qrcode text-blue-600"></i> قراءة الباركود أو الإدخال اليدوي
+                </h2>
+                
+                <!-- Manual / Barcode Input Form -->
+                <div class="flex gap-2">
+                    <input type="text" id="manual-barcode-input" placeholder="أدخل رقم الباركود أو امسحه..." class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="searchByBarcode(document.getElementById('manual-barcode-input').value)" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                        بحث
+                    </button>
+                </div>
+
+                <!-- Camera Scanner Container -->
+                <div class="border rounded-xl p-4 bg-gray-50 text-center">
+                    <div id="reader" class="w-full max-w-md mx-auto rounded-lg overflow-hidden"></div>
+                    <button id="start-camera" onclick="startScanner()" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                        <i class="fa-solid fa-video"></i> تشغيل الكاميرا للمسح
+                    </button>
+                    <button id="stop-camera" onclick="stopScanner()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition hidden">
+                        <i class="fa-solid fa-video-slash"></i> إيقاف الكاميرا
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Display Card -->
+            <div id="scan-result" class="bg-white p-6 rounded-xl shadow-sm border hidden">
+                <h3 class="text-md font-semibold text-gray-500 mb-4 border-b pb-2">معلومات المادة</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <span class="block text-xs text-gray-500 mb-1">اسم المادة</span>
+                        <span id="res-name" class="text-lg font-bold text-blue-900">-</span>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <span class="block text-xs text-gray-500 mb-1">القسم / التصنيف</span>
+                        <span id="res-category" class="text-lg font-bold text-green-900">-</span>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-lg">
+                        <span class="block text-xs text-gray-500 mb-1">السعر</span>
+                        <span id="res-price" class="text-lg font-bold text-amber-900">-</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: ITEMS MANAGEMENT -->
+        <section id="tab-items" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                <h2 id="item-form-title" class="text-lg font-bold text-gray-700 mb-4">إضافة مادة جديدة</h2>
+                <form id="item-form" onsubmit="saveItem(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="edit-item-id">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">رقم الباركود</label>
+                        <input type="text" id="item-barcode" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">اسم المادة</label>
+                        <input type="text" id="item-name" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">القسم</label>
+                        <select id="item-category" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                            <option value="">اختر القسم...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">السعر</label>
+                        <input type="number" step="0.01" id="item-price" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="md:col-span-2 flex gap-2">
+                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">حفظ المادة</button>
+                        <button type="button" onclick="resetItemForm()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition hidden" id="cancel-edit-btn">إلغاء</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Items Table -->
+            <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div class="p-4 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-gray-700">قائمة المواد المخزنة</h3>
+                    <input type="text" id="search-items" oninput="renderItemsTable()" placeholder="بحث في المواد..." class="border rounded-lg px-3 py-1 text-sm">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-600 text-sm">
+                                <th class="p-3">الباركود</th>
+                                <th class="p-3">اسم المادة</th>
+                                <th class="p-3">القسم</th>
+                                <th class="p-3">السعر</th>
+                                <th class="p-3 text-center">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-table-body" class="divide-y text-sm">
+                            <!-- Items inserted dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: CATEGORIES MANAGEMENT -->
+        <section id="tab-categories" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                <h2 class="text-lg font-bold text-gray-700 mb-4">إضافة قسم جديد</h2>
+                <form onsubmit="saveCategory(event)" class="flex gap-2">
+                    <input type="text" id="category-name" placeholder="اسم القسم (مثال: مشروبات، إلكترونيات...)" required class="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">إضافة القسم</button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <h3 class="font-bold text-gray-700 mb-4">الأقسام الحالية</h3>
+                <div id="categories-list" class="flex flex-wrap gap-2">
+                    <!-- Categories pills inserted dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: BACKUP & SYNC -->
+        <section id="tab-backup" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                <h2 class="text-lg font-bold text-gray-700">النسخ الاحتياطي واستعادة البيانات</h2>
+                <p class="text-sm text-gray-500">يمكنك تصدير ملف نسخة احتياطية (JSON) لحفظ بياناتك محلياً على جهازك، أو استيراد نسخة سابقة لاستعادة البيانات.</p>
+                
+                <div class="flex flex-wrap gap-4 pt-2">
+                    <button onclick="exportBackup()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> تصدير ملف الباك اب (Export)
+                    </button>
+                    
+                    <label class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition cursor-pointer flex items-center gap-2">
+                        <i class="fa-solid fa-upload"></i> استيراد ملف الباك اب (Import)
+                        <input type="file" id="import-file" accept=".json" onchange="importBackup(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- App Logic Script -->
+    <script>
+        // --- إعدادات فايربيس (Firebase Config) ---
+        // استبدل البيانات أدناه بمعلومات مشروعك المجاني على Firebase Console
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        let db;
+        let isCloudConnected = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            isCloudConnected = true;
+            document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> متصل بالسحاب';
+        } catch (e) {
+            console.warn("Firebase not configured properly, using LocalStorage fallback.");
+            document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> وضع المحلي (Offline)';
+        }
+
+        // --- البيانات المحلية والذاكرة المؤقتة ---
+        let itemsData = [];
+        let categoriesData = [];
+
+        // تحميل البيانات عند بدء التشغيل
+        window.onload = function() {
+            loadData();
+        };
+
+        function loadData() {
+            if (isCloudConnected) {
+                // استماع للتحديثات الفورية من فايربيس
+                db.collection("categories").onSnapshot(snapshot => {
+                    categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    updateCategoriesUI();
+                });
+
+                db.collection("items").onSnapshot(snapshot => {
+                    itemsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderItemsTable();
+                });
+            } else {
+                // وضع التخزين المحلي الاحتياطي
+                categoriesData = JSON.parse(localStorage.getItem('categories') || '[]');
+                itemsData = JSON.parse(localStorage.getItem('items') || '[]');
+                updateCategoriesUI();
+                renderItemsTable();
+            }
+        }
+
+        function saveDataLocalOrCloud(collectionName, id, data) {
+            if (isCloudConnected) {
+                db.collection(collectionName).doc(id).set(data);
+            } else {
+                if (collectionName === 'items') {
+                    let index = itemsData.findIndex(i => i.id === id);
+                    if (index >= 0) itemsData[index] = { id, ...data };
+                    else itemsData.push({ id, ...data });
+                    localStorage.setItem('items', JSON.stringify(itemsData));
+                    renderItemsTable();
+                } else {
+                    let index = categoriesData.findIndex(c => c.id === id);
+                    if (index >= 0) categoriesData[index] = { id, ...data };
+                    else categoriesData.push({ id, ...data });
+                    localStorage.setItem('categories', JSON.stringify(categoriesData));
+                    updateCategoriesUI();
+                }
+            }
+        }
+
+        function deleteDataLocalOrCloud(collectionName, id) {
+            if (isCloudConnected) {
+                db.collection(collectionName).doc(id).delete();
+            } else {
+                if (collectionName === 'items') {
+                    itemsData = itemsData.filter(i => i.id !== id);
+                    localStorage.setItem('items', JSON.stringify(itemsData));
+                    renderItemsTable();
+                } else {
+                    categoriesData = categoriesData.filter(c => c.id !== id);
+                    localStorage.setItem('categories', JSON.stringify(categoriesData));
+                    updateCategoriesUI();
+                }
+            }
+        }
+
+        // --- إدارة التنقل بين الصفحات (Tabs) ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('border-blue-600', 'text-blue-600');
+                el.classList.add('border-transparent', 'text-gray-600');
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('border-blue-600', 'text-blue-600');
+            if(tabId !== 'scanner') {
+                stopScanner();
+            }
+        }
+
+        // --- الأقسام (Categories) ---
+        function saveCategory(e) {
+            e.preventDefault();
+            const name = document.getElementById('category-name').value.trim();
+            if (!name) return;
+            const id = 'cat_' + Date.now();
+            saveDataLocalOrCloud('categories', id, { name });
+            document.getElementById('category-name').value = '';
+        }
+
+        function updateCategoriesUI() {
+            const listEl = document.getElementById('categories-list');
+            const selectEl = document.getElementById('item-category');
+            
+            listEl.innerHTML = categoriesData.map(cat => `
+                <div class="bg-gray-100 border px-3 py-2 rounded-lg flex items-center gap-3">
+                    <span class="font-semibold">${cat.name}</span>
+                    <button onclick="deleteCategory('${cat.id}')" class="text-red-500 hover:text-red-700 text-xs"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('');
+
+            selectEl.innerHTML = '<option value="">اختر القسم...</option>' + categoriesData.map(cat => `
+                <option value="${cat.name}">${cat.name}</option>
+            `).join('');
+        }
+
+        function deleteCategory(id) {
+            if (confirm('هل أنت متأكد من حذف هذا القسم؟')) {
+                deleteDataLocalOrCloud('categories', id);
+            }
+        }
+
+        // --- المواد (Items) ---
+        function saveItem(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-item-id').value;
+            const id = editId ? editId : 'item_' + Date.now();
+            const data = {
+                barcode: document.getElementById('item-barcode').value.trim(),
+                name: document.getElementById('item-name').value.trim(),
+                category: document.getElementById('item-category').value,
+                price: parseFloat(document.getElementById('item-price').value)
+            };
+
+            saveDataLocalOrCloud('items', id, data);
+            resetItemForm();
+            alert('تم حفظ المادة بنجاح!');
+        }
+
+        function renderItemsTable() {
+            const tbody = document.getElementById('items-table-body');
+            const query = document.getElementById('search-items').value.toLowerCase();
+            
+            const filtered = itemsData.filter(i => 
+                i.name.toLowerCase().includes(query) || 
+                i.barcode.includes(query) || 
+                i.category.toLowerCase().includes(query)
+            );
+
+            tbody.innerHTML = filtered.map(item => `
+                <tr class="hover:bg-gray-50 border-b">
+                    <td class="p-3 font-mono">${item.barcode}</td>
+                    <td class="p-3 font-semibold">${item.name}</td>
+                    <td class="p-3"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${item.category}</span></td>
+                    <td class="p-3 text-blue-600 font-bold">${item.price}</td>
+                    <td class="p-3 text-center space-x-2 space-x-reverse">
+                        <button onclick="editItem('${item.id}')" class="text-blue-500 hover:text-blue-700"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editItem(id) {
+            const item = itemsData.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('edit-item-id').value = item.id;
+            document.getElementById('item-barcode').value = item.barcode;
+            document.getElementById('item-name').value = item.name;
+            document.getElementById('item-category').value = item.category;
+            document.getElementById('item-price').value = item.price;
+            document.getElementById('item-form-title').innerText = 'تعديل مادة';
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            switchTab('items');
+        }
+
+        function resetItemForm() {
+            document.getElementById('item-form').reset();
+            document.getElementById('edit-item-id').value = '';
+            document.getElementById('item-form-title').innerText = 'إضافة مادة جديدة';
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        }
+
+        function deleteItem(id) {
+            if (confirm('هل أنت متأكد من حذف هذه المادة؟')) {
+                deleteDataLocalOrCloud('items', id);
+            }
+        }
+
+        // --- القارئ والبحث (Scanner & Lookup) ---
+        function searchByBarcode(code) {
+            code = code.trim();
+            if (!code) return;
+            const item = itemsData.find(i => i.barcode === code);
+            const resultBox = document.getElementById('scan-result');
+            
+            if (item) {
+                document.getElementById('res-name').innerText = item.name;
+                document.getElementById('res-category').innerText = item.category;
+                document.getElementById('res-price').innerText = item.price;
+                resultBox.classList.remove('hidden');
+            } else {
+                alert('لم يتم العثور على مادة بهذا الباركود!');
+                resultBox.classList.add('hidden');
+            }
+        }
+
+        // --- كاميرا الباركود (Html5Qrcode) ---
+        let html5QrCode = null;
+
+        function startScanner() {
+            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                document.getElementById('manual-barcode-input').value = decodedText;
+                searchByBarcode(decodedText);
+                stopScanner();
+            };
+
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 150 } },
+                qrCodeSuccessCallback
+            ).then(() => {
+                document.getElementById('start-camera').classList.add('hidden');
+                document.getElementById('stop-camera').classList.remove('hidden');
+            }).catch(err => {
+                alert("تعذر تشغيل الكاميرا. تأكد من إعطاء الصلاحيات أو استخدام متصفح مدعوم.");
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('start-camera').classList.remove('hidden');
+                    document.getElementById('stop-camera').classList.add('hidden');
+                }).catch(err => console.error(err));
+            }
+        }
+
+        // --- النسخ الاحتياطي (Backup Export & Import) ---
+        function exportBackup() {
+            const backupData = {
+                items: itemsData,
+                categories: categoriesData,
+                exportDate: new Date().toISOString()
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `inventory_backup_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = JSON.parse(e.target.result);
+                    if (content.items && content.categories) {
+                        if (confirm('هل أنت متأكد من استعادة النسخة الاحتياطي؟ سيتم دمج البيانات أو استبدالها.')) {
+                            content.items.forEach(item => saveDataLocalOrCloud('items', item.id || ('item_' + Math.random()), item));
+                            content.categories.forEach(cat => saveDataLocalOrCloud('categories', cat.id || ('cat_' + Math.random()), cat));
+                            alert('تم استعادة النسخة الاحتياطية بنجاح!');
+                        }
+                    } else {
+                        alert('ملف النسخة الاحتياطية غير صالح!');
+                    }
+                } catch (err) {
+                    alert('حدث خطأ أثناء قراءة الملف!');
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
