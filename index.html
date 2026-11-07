@@ -23,7 +23,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
 
-    <!-- Navbar Header -->
+    <!-- Navbar -->
     <header class="bg-indigo-900 dark:bg-slate-900 text-white shadow-lg sticky top-0 z-50 transition-colors border-b dark:border-slate-800">
         <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center gap-3">
@@ -32,7 +32,7 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <!-- Dark Mode Button -->
+                <!-- Dark Mode Toggle Button -->
                 <button id="theme-toggle" onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-indigo-950/80 hover:bg-indigo-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-300 dark:text-amber-400 transition-all border border-indigo-700/50 dark:border-slate-700" title="تبديل الوضع الداكن/الفاتح">
                     <i id="theme-toggle-icon" class="fa-solid fa-moon text-lg"></i>
                 </button>
@@ -56,19 +56,14 @@
     <!-- Main Content Container -->
     <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
 
-        <!-- PAGE 1: VIEW / CATALOG -->
+        <!-- VIEW PAGE -->
         <section id="page-view" class="space-y-6">
-            
-            <!-- Controls Bar (Live Search by Title, Author, Stock) -->
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-4 justify-between items-center transition-colors">
-                
-                <!-- Search Box -->
                 <div class="relative w-full md:w-1/2">
                     <i class="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="ابحث باسم الكتاب، المؤلف، أو عدد المخزون..." class="w-full pr-11 pl-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-slate-700 dark:text-slate-200 placeholder-slate-400">
+                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="ابحث باسم الكتاب أو المؤلف..." class="w-full pr-11 pl-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-slate-700 dark:text-slate-200 placeholder-slate-400">
                 </div>
 
-                <!-- Category & Author Filters -->
                 <div class="flex flex-wrap gap-3 w-full md:w-auto">
                     <select id="filter-author" onchange="applyFilters()" class="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-slate-600 dark:text-slate-300">
                         <option value="">جميع المؤلفين</option>
@@ -80,22 +75,18 @@
                 </div>
             </div>
 
-            <!-- Books Grid: Always 2 Columns -->
             <div id="books-grid" class="grid grid-cols-2 gap-4 md:gap-6">
-                <!-- Dynamic cards inserted via JS -->
+                <!-- Dynamic cards -->
             </div>
 
-            <!-- Empty State -->
             <div id="empty-view" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
                 <i class="fa-solid fa-book-open text-5xl text-slate-300 dark:text-slate-700 mb-3"></i>
-                <p class="text-slate-500 dark:text-slate-400 text-lg font-medium">لم يتم العثور على كتب تطابق نتائج البحث</p>
+                <p class="text-slate-500 dark:text-slate-400 text-lg font-medium">لم يتم العثور على كتب تطابق البحث</p>
             </div>
         </section>
 
-        <!-- PAGE 2: ADMIN MANAGEMENT -->
+        <!-- ADMIN PAGE -->
         <section id="page-admin" class="hidden space-y-8">
-            
-            <!-- Book Form Card -->
             <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
                 <h2 id="form-title" class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
                     <i class="fa-solid fa-plus-circle text-indigo-600 dark:text-indigo-400"></i> إضافة كتاب جديد
@@ -126,22 +117,20 @@
                         </div>
                     </div>
 
-                    <!-- Image Upload Section -->
                     <div class="border-t border-slate-100 dark:border-slate-800 pt-5">
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">غلاف الكتاب</label>
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                             <div>
-                                <span class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">رابط مباشر للصورة (URL):</span>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">رابط مباشر للصورة:</span>
                                 <input type="url" id="image-url" oninput="handleUrlInput()" placeholder="https://example.com/cover.jpg" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm dark:text-slate-100">
                             </div>
 
                             <div>
-                                <span class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">أو رفع صورة من الجهاز:</span>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">أو رفع ملف من الجهاز:</span>
                                 <input type="file" id="image-file" accept="image/*" onchange="handleFileInput(event)" class="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-950 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900 cursor-pointer">
                             </div>
 
-                            <!-- Image Preview -->
                             <div class="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 min-h-[120px]">
                                 <span class="text-xs text-slate-400 dark:text-slate-500 mb-2">معاينة الغلاف</span>
                                 <img id="image-preview" src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80" class="h-28 w-20 object-cover rounded shadow border border-slate-200 dark:border-slate-700" alt="معاينة">
@@ -160,11 +149,18 @@
                 </form>
             </div>
 
-            <!-- Books Stock Table -->
+            <!-- Books Table with Dedicated Search -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
-                <div class="p-5 border-b border-slate-100 dark:border-slate-800">
+                <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">قائمة الكتب والمخزون</h3>
+                    
+                    <!-- Admin Table Live Search -->
+                    <div class="relative w-full sm:w-72">
+                        <i class="fa-solid fa-boxes-stacked absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="admin-search-input" oninput="renderAdminTable()" placeholder="بحث بالمخزون، العنوان أو المؤلف..." class="w-full pr-10 pl-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs md:text-sm text-slate-700 dark:text-slate-200">
+                    </div>
                 </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-right border-collapse">
                         <thead>
@@ -185,10 +181,10 @@
             </div>
         </section>
 
-        <!-- PAGE 3: BACKUP & RESTORE -->
+        <!-- BACKUP & RESTORE PAGE -->
         <section id="page-backup" class="hidden space-y-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Export Backup Card -->
+                <!-- Export Card -->
                 <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-6">
                     <div>
                         <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl mb-4">
@@ -196,7 +192,7 @@
                         </div>
                         <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">تصدير نسخة احتياطية</h3>
                         <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                            تنزيل ملف يحتوى على جميع بيانات الكتب والمخزون بصيغة JSON لحفظها بأمان على جهازك.
+                            قم بتحميل ملف يحتوى على جميع الكتب المخزنة والصور والبيانات بتنسيق JSON لاحتفاظ نسخة آمنة على جهازك.
                         </p>
                     </div>
                     <button onclick="exportBackup()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2">
@@ -204,7 +200,7 @@
                     </button>
                 </div>
 
-                <!-- Import Backup Card -->
+                <!-- Import Card -->
                 <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-6">
                     <div>
                         <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl mb-4">
@@ -212,7 +208,7 @@
                         </div>
                         <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">استعادة نسخة احتياطية</h3>
                         <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                            اختر ملف نسخة احتياطية (.json) مسبق لإعادة استرجاع وتبديل قضايا المكتبة الحالية.
+                            اختر ملف نسخة احتياطية سابق (.json) لاسترجاع بيانات المكتبة وتحديث قائمة الكتب الحالية تلقائياً.
                         </p>
                     </div>
                     <div>
@@ -232,7 +228,7 @@
         <p>مكتبتي الرقمية &copy; 2026 - جميع الحقوق محفوظة</p>
     </footer>
 
-    <!-- JavaScript Application Logic -->
+    <!-- JavaScript Logic -->
     <script>
         const DEFAULT_COVER = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80';
         let currentImageBase64 = '';
@@ -256,7 +252,6 @@
             }
         ];
 
-        // Theme Initialization & Toggle
         function initTheme() {
             const savedTheme = localStorage.getItem('digital_library_theme');
             const icon = document.getElementById('theme-toggle-icon');
@@ -285,7 +280,6 @@
             }
         }
 
-        // Local Storage State Management
         function getBooks() {
             const data = localStorage.getItem('digital_library_books');
             if (!data) {
@@ -302,7 +296,6 @@
             populateFilters();
         }
 
-        // Navigation Switcher
         function switchTab(tab) {
             const viewPage = document.getElementById('page-view');
             const adminPage = document.getElementById('page-admin');
@@ -335,7 +328,39 @@
             }
         }
 
-        // Image Sources Preview Handlers
+        function exportBackup() {
+            const books = getBooks();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(books, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `digital_library_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const importedBooks = JSON.parse(evt.target.result);
+                    if (Array.isArray(importedBooks)) {
+                        saveBooks(importedBooks);
+                        alert('تم استعادة النسخة الاحتياطية بنجاح!');
+                        switchTab('view');
+                    } else {
+                        alert('الملف المرفق غير صالح.');
+                    }
+                } catch (err) {
+                    alert('حدث خطأ أثناء قراءة الملف. يرجى التأكد من اختيار ملف JSON صحيح.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
         function handleUrlInput() {
             const url = document.getElementById('image-url').value.trim();
             const preview = document.getElementById('image-preview');
@@ -357,36 +382,6 @@
             }
         }
 
-        // Live Filter / Search (Title, Author, Stock count)
-        function applyFilters() {
-            const query = document.getElementById('search-input').value.trim().toLowerCase();
-            const selectedAuthor = document.getElementById('filter-author').value;
-            const selectedCategory = document.getElementById('filter-category').value;
-
-            const books = getBooks();
-            const filtered = books.filter(book => {
-                // Title & Author text matching
-                const matchesTitle = book.title.toLowerCase().includes(query);
-                const matchesAuthorText = book.author.toLowerCase().includes(query);
-                const matchesCategoryText = book.category.toLowerCase().includes(query);
-                
-                // Stock Search logic (matches exact number or stock text)
-                const stockStr = book.stock.toString();
-                const matchesStock = stockStr.includes(query) || 
-                                     (query === 'نفد' && book.stock === 0) ||
-                                     (query === 'متوفر' && book.stock > 0);
-
-                const matchesSearch = matchesTitle || matchesAuthorText || matchesCategoryText || matchesStock;
-                const matchesAuthor = selectedAuthor === '' || book.author === selectedAuthor;
-                const matchesCategory = selectedCategory === '' || book.category === selectedCategory;
-
-                return matchesSearch && matchesAuthor && matchesCategory;
-            });
-
-            renderView(filtered);
-        }
-
-        // Render Books Grid (2 Columns grid-cols-2)
         function renderView(filteredBooks = null) {
             const books = filteredBooks || getBooks();
             const grid = document.getElementById('books-grid');
@@ -434,13 +429,35 @@
             });
         }
 
-        // Render Admin Control Table
+        // Render Admin Table with Live Search Filter
         function renderAdminTable() {
             const books = getBooks();
             const tbody = document.getElementById('books-table-body');
+            const searchInput = document.getElementById('admin-search-input');
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
             tbody.innerHTML = '';
 
-            books.forEach(book => {
+            const filtered = books.filter(book => {
+                if (!query) return true;
+                return book.title.toLowerCase().includes(query) ||
+                       book.author.toLowerCase().includes(query) ||
+                       book.category.toLowerCase().includes(query) ||
+                       book.stock.toString().includes(query);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-400">
+                            لا توجد نتائج تطابق البحث في المخزون
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filtered.forEach(book => {
                 const row = `
                     <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                         <td class="p-4">
@@ -466,7 +483,6 @@
             });
         }
 
-        // Dropdowns Populator
         function populateFilters() {
             const books = getBooks();
             const authorSelect = document.getElementById('filter-author');
@@ -486,7 +502,23 @@
             });
         }
 
-        // Form Actions (Add / Edit)
+        function applyFilters() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            const selectedAuthor = document.getElementById('filter-author').value;
+            const selectedCategory = document.getElementById('filter-category').value;
+
+            const books = getBooks();
+            const filtered = books.filter(book => {
+                const matchesSearch = book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query);
+                const matchesAuthor = selectedAuthor === '' || book.author === selectedAuthor;
+                const matchesCategory = selectedCategory === '' || book.category === selectedCategory;
+
+                return matchesSearch && matchesAuthor && matchesCategory;
+            });
+
+            renderView(filtered);
+        }
+
         function handleFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('book-id').value;
@@ -570,41 +602,6 @@
             document.getElementById('btn-cancel').classList.add('hidden');
         }
 
-        // Backup Actions
-        function exportBackup() {
-            const books = getBooks();
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(books, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `digital_library_backup_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importBackup(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const importedBooks = JSON.parse(evt.target.result);
-                    if (Array.isArray(importedBooks)) {
-                        saveBooks(importedBooks);
-                        alert('تمت استعادة النسخة الاحتياطية بنجاح!');
-                        switchTab('view');
-                    } else {
-                        alert('الملف المرفق غير صالح.');
-                    }
-                } catch (err) {
-                    alert('حدث خطأ أثناء قراءة الملف. يرجى اختيار ملف JSON صحيح.');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // App Initialization
         window.onload = function() {
             initTheme();
             renderView();
