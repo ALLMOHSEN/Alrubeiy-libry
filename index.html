@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المكتبة الإلكترونية الرقمية</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font - Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .custom-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navbar Header -->
+    <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="p-2.5 bg-indigo-600 rounded-xl shadow-inner">
+                        <i class="fa-solid fa-book-open text-2xl text-amber-300"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold tracking-tight">مكتبتي الرقمية</h1>
+                        <p class="text-xs text-indigo-200">منصتك الشاملة لإدارة وقراءة الكتب</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="flex bg-indigo-800/60 p-1.5 rounded-xl border border-indigo-500/30">
+                    <button id="tab-catalog" onclick="switchTab('catalog')" 
+                        class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-white text-indigo-700 shadow-md">
+                        <i class="fa-solid fa-store"></i>
+                        <span>معرض الكتب</span>
+                    </button>
+                    <button id="tab-admin" onclick="switchTab('admin')" 
+                        class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-indigo-100 hover:text-white hover:bg-indigo-700/50">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>إدارة الكتب</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Notification Toast -->
+        <div id="toast" class="hidden fixed bottom-5 left-5 z-50 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-opacity">
+            <i class="fa-solid fa-circle-check text-xl"></i>
+            <span id="toast-msg">تمت العملية بنجاح!</span>
+        </div>
+
+        <!-- ================= PAGE 1: CATALOG VIEW ================= -->
+        <section id="page-catalog" class="space-y-6">
+            
+            <!-- Controls Bar: Search & Filters -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between md:gap-4">
+                
+                <!-- Search Box -->
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="search-input" oninput="applyFilters()"
+                        placeholder="ابحث بعنوان الكتاب، اسم المؤلف، أو الصنف..." 
+                        class="w-full pr-11 pl-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm transition-all">
+                </div>
+
+                <!-- Filters -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Category Filter -->
+                    <div class="relative min-w-[150px]">
+                        <select id="filter-category" onchange="applyFilters()" 
+                            class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer pr-4 pl-9">
+                            <option value="">جميع التصنيفات</option>
+                        </select>
+                        <i class="fa-solid fa-angle-down absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+
+                    <!-- Author Filter -->
+                    <div class="relative min-w-[150px]">
+                        <select id="filter-author" onchange="applyFilters()" 
+                            class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer pr-4 pl-9">
+                            <option value="">جميع المؤلفين</option>
+                        </select>
+                        <i class="fa-solid fa-angle-down absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+
+                    <!-- Sort Option -->
+                    <div class="relative min-w-[140px]">
+                        <select id="sort-by" onchange="applyFilters()" 
+                            class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer pr-4 pl-9">
+                            <option value="title-asc">العنوان (أ-ي)</option>
+                            <option value="stock-desc">الأكثر توفراً</option>
+                            <option value="stock-asc">الأقل توفراً</option>
+                        </select>
+                        <i class="fa-solid fa-arrow-up-wide-short absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex justify-between items-center px-1 text-sm text-slate-500 font-semibold">
+                <span>تم العثور على (<span id="results-count" class="text-indigo-600 font-bold">0</span>) كتاب</span>
+            </div>
+
+            <!-- Books Grid Container -->
+            <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Book Cards dynamic insertion -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+                <i class="fa-solid fa-book-bookmark text-5xl text-slate-300 mb-4"></i>
+                <h3 class="text-lg font-bold text-slate-600">لم يتم العثور على أي كتب</h3>
+                <p class="text-slate-400 text-sm mt-1">جرب تغيير كلمات البحث أو خيارات التصفية.</p>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 2: ADMIN MANAGEMENT ================= -->
+        <section id="page-admin" class="hidden space-y-8">
+            
+            <!-- Add / Edit Form Card -->
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+                    <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                        <i id="form-icon" class="fa-solid fa-plus-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 id="form-title" class="text-xl font-bold text-slate-800">إضافة كتاب جديد</h2>
+                        <p class="text-xs text-slate-400">أدخل البيانات المطلوبة لإضافة الكتاب لقاعدة البيانات والمخزن</p>
+                    </div>
+                </div>
+
+                <form id="book-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                    <input type="hidden" id="book-id">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Book Title -->
+                        <div>
+                            <label for="book-title" class="block text-xs font-bold text-slate-700 uppercase mb-2">عنوان الكتاب *</label>
+                            <input type="text" id="book-title" required placeholder="مثال: مقدمة ابن خلدون"
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                        </div>
+
+                        <!-- Author Name -->
+                        <div>
+                            <label for="book-author" class="block text-xs font-bold text-slate-700 uppercase mb-2">اسم المؤلف *</label>
+                            <input type="text" id="book-author" required placeholder="مثال: ابن خلدون"
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <label for="book-category" class="block text-xs font-bold text-slate-700 uppercase mb-2">صنف / نوع الكتاب *</label>
+                            <input type="text" id="book-category" required placeholder="مثال: تاريخ، فلسفة، رواية..."
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                        </div>
+
+                        <!-- Stock Count -->
+                        <div>
+                            <label for="book-stock" class="block text-xs font-bold text-slate-700 uppercase mb-2">عدد النسخ المتبقية بالمخزن *</label>
+                            <input type="number" id="book-stock" required min="0" placeholder="مثال: 15"
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 font-bold text-sm">
+                            إلغاء التعديل
+                        </button>
+                        <button type="submit" id="btn-submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-all text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-save"></i>
+                            <span id="btn-submit-text">حفظ الكتاب</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Management Table Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="font-bold text-slate-800">جدول التحكم بالكتب المخزنة</h3>
+                    <span class="text-xs bg-slate-100 text-slate-600 font-semibold px-3 py-1 rounded-full" id="table-count">0 كتب</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs font-bold uppercase border-b border-slate-200">
+                                <th class="py-3.5 px-6">عنوان الكتاب</th>
+                                <th class="py-3.5 px-6">المؤلف</th>
+                                <th class="py-3.5 px-6">الصنف</th>
+                                <th class="py-3.5 px-6 text-center">الكمية بالمخزن</th>
+                                <th class="py-3.5 px-6 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body" class="divide-y divide-slate-100 text-sm">
+                            <!-- Dynamic Table Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>جميع الحقوق محفوظة &copy; 2026 - نظام المكتبة الإلكترونية الرقمية</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Initial Sample Data (Requirement: At least 2 initial books)
+        const initialBooks = [
+            {
+                id: '1',
+                title: 'مقدمة ابن خلدون',
+                author: 'ابن خلدون',
+                category: 'تاريخ وفلسفة',
+                stock: 12
+            },
+            {
+                id: '2',
+                title: 'الأيام',
+                author: 'طه حسين',
+                category: 'سيرة ذاتية',
+                stock: 5
+            }
+        ];
+
+        // Global State
+        let books = [];
+
+        // Initialize App on DOM Load
+        window.onload = function() {
+            loadBooksFromStorage();
+            renderCatalog();
+            renderAdminTable();
+            populateFilters();
+        };
+
+        // Storage Handlers
+        function loadBooksFromStorage() {
+            const saved = localStorage.getItem('my_library_books');
+            if (saved) {
+                try {
+                    books = JSON.parse(saved);
+                } catch (e) {
+                    books = [...initialBooks];
+                }
+            } else {
+                books = [...initialBooks];
+                saveBooksToStorage();
+            }
+        }
+
+        function saveBooksToStorage() {
+            localStorage.setItem('my_library_books', JSON.stringify(books));
+        }
+
+        // Navigation Between Views
+        function switchTab(tab) {
+            const catalogPage = document.getElementById('page-catalog');
+            const adminPage = document.getElementById('page-admin');
+            const catalogBtn = document.getElementById('tab-catalog');
+            const adminBtn = document.getElementById('tab-admin');
+
+            if (tab === 'catalog') {
+                catalogPage.classList.remove('hidden');
+                adminPage.classList.add('hidden');
+                
+                catalogBtn.className = "flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-white text-indigo-700 shadow-md";
+                adminBtn.className = "flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-indigo-100 hover:text-white hover:bg-indigo-700/50";
+                
+                renderCatalog();
+            } else {
+                catalogPage.classList.add('hidden');
+                adminPage.classList.remove('hidden');
+
+                adminBtn.className = "flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-white text-indigo-700 shadow-md";
+                catalogBtn.className = "flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-indigo-100 hover:text-white hover:bg-indigo-700/50";
+                
+                renderAdminTable();
+            }
+        }
+
+        // Populate Dynamic Filter Selects
+        function populateFilters() {
+            const categorySelect = document.getElementById('filter-category');
+            const authorSelect = document.getElementById('filter-author');
+
+            const currentCat = categorySelect.value;
+            const currentAuth = authorSelect.value;
+
+            // Extract unique categories and authors
+            const categories = [...new Set(books.map(b => b.category.trim()))].filter(Boolean);
+            const authors = [...new Set(books.map(b => b.author.trim()))].filter(Boolean);
+
+            categorySelect.innerHTML = '<option value="">جميع التصنيفات</option>' + 
+                categories.map(c => `<option value="${c}" ${c === currentCat ? 'selected' : ''}>${c}</option>`).join('');
+
+            authorSelect.innerHTML = '<option value="">جميع المؤلفين</option>' + 
+                authors.map(a => `<option value="${a}" ${a === currentAuth ? 'selected' : ''}>${a}</option>`).join('');
+        }
+
+        // Filter and Search Logic
+        function getFilteredBooks() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const category = document.getElementById('filter-category').value;
+            const author = document.getElementById('filter-author').value;
+            const sortBy = document.getElementById('sort-by').value;
+
+            let result = books.filter(book => {
+                const matchesSearch = book.title.toLowerCase().includes(query) || 
+                                      book.author.toLowerCase().includes(query) || 
+                                      book.category.toLowerCase().includes(query);
+                const matchesCategory = category === "" || book.category === category;
+                const matchesAuthor = author === "" || book.author === author;
+
+                return matchesSearch && matchesCategory && matchesAuthor;
+            });
+
+            // Sorting
+            if (sortBy === 'title-asc') {
+                result.sort((a, b) => a.title.localeCompare(b.title, 'ar'));
+            } else if (sortBy === 'stock-desc') {
+                result.sort((a, b) => b.stock - a.stock);
+            } else if (sortBy === 'stock-asc') {
+                result.sort((a, b) => a.stock - b.stock);
+            }
+
+            return result;
+        }
+
+        function applyFilters() {
+            renderCatalog();
+        }
+
+        // Render Catalog Grid
+        function renderCatalog() {
+            const grid = document.getElementById('books-grid');
+            const emptyState = document.getElementById('empty-state');
+            const filteredBooks = getFilteredBooks();
+
+            document.getElementById('results-count').innerText = filteredBooks.length;
+
+            if (filteredBooks.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filteredBooks.map(book => {
+                const isOutOfStock = book.stock <= 0;
+                const stockBadgeClass = isOutOfStock 
+                    ? 'bg-rose-100 text-rose-700' 
+                    : (book.stock <= 3 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700');
+                
+                return `
+                    <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/80 flex flex-col justify-between">
+                        <div>
+                            <!-- Header Decoration/Badge -->
+                            <div class="h-3 bg-gradient-to-r from-indigo-500 to-indigo-700"></div>
+                            <div class="p-6">
+                                <div class="flex items-start justify-between gap-2 mb-3">
+                                    <span class="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-full border border-indigo-100">
+                                        ${escapeHTML(book.category)}
+                                    </span>
+                                    <span class="text-xs font-bold px-2.5 py-1 rounded-full ${stockBadgeClass}">
+                                        ${isOutOfStock ? 'نفد من المخزن' : `المتبقي: ${book.stock}`}
+                                    </span>
+                                </div>
+                                <h3 class="font-extrabold text-lg text-slate-800 line-clamp-2 leading-snug mb-2">${escapeHTML(book.title)}</h3>
+                                <p class="text-slate-500 text-sm flex items-center gap-2">
+                                    <i class="fa-regular fa-user text-xs text-indigo-500"></i>
+                                    <span>${escapeHTML(book.author)}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-400 font-mono">ID: #${book.id}</span>
+                            <button onclick="quickEdit('${book.id}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                                <i class="fa-solid fa-[#fa-pen]"></i>
+                                تعديل بياناته
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render Admin Table
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-table-body');
+            document.getElementById('table-count').innerText = `${books.length} كتب`;
+
+            if (books.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-400">لا توجد كتب مضافة حتى الآن.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = books.map(book => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-4 px-6 font-bold text-slate-800">${escapeHTML(book.title)}</td>
+                    <td class="py-4 px-6 text-slate-600">${escapeHTML(book.author)}</td>
+                    <td class="py-4 px-6">
+                        <span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold">
+                            ${escapeHTML(book.category)}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        <span class="font-bold ${book.stock > 0 ? 'text-slate-700' : 'text-rose-600'}">
+                            ${book.stock}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-center space-x-2 space-x-reverse">
+                        <button onclick="editBook('${book.id}')" title="تعديل" 
+                            class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteBook('${book.id}')" title="حذف" 
+                            class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Form Submit Handler (Add / Edit)
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('book-id').value;
+            const title = document.getElementById('book-title').value.trim();
+            const author = document.getElementById('book-author').value.trim();
+            const category = document.getElementById('book-category').value.trim();
+            const stock = parseInt(document.getElementById('book-stock').value, 10);
+
+            if (id) {
+                // Update existing
+                const index = books.findIndex(b => b.id === id);
+                if (index !== -1) {
+                    books[index] = { id, title, author, category, stock };
+                    showToast("تم تحديث بيانات الكتاب بنجاح");
+                }
+            } else {
+                // Add new
+                const newBook = {
+                    id: Date.now().toString(),
+                    title,
+                    author,
+                    category,
+                    stock
+                };
+                books.push(newBook);
+                showToast("تم إضافة الكتاب الجديد للمكتبة بنجاح");
+            }
+
+            saveBooksToStorage();
+            populateFilters();
+            resetForm();
+            renderAdminTable();
+        }
+
+        // Prepare Form for Editing
+        function editBook(id) {
+            const book = books.find(b => b.id === id);
+            if (!book) return;
+
+            document.getElementById('book-id').value = book.id;
+            document.getElementById('book-title').value = book.title;
+            document.getElementById('book-author').value = book.author;
+            document.getElementById('book-category').value = book.category;
+            document.getElementById('book-stock').value = book.stock;
+
+            document.getElementById('form-title').innerText = "تعديل بيانات الكتاب";
+            document.getElementById('btn-submit-text').innerText = "تحديث البيانات";
+            document.getElementById('form-icon').className = "fa-solid fa-pen-to-square text-xl";
+            document.getElementById('btn-cancel').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function quickEdit(id) {
+            switchTab('admin');
+            editBook(id);
+        }
+
+        // Delete Book
+        function deleteBook(id) {
+            books = books.filter(b => b.id !== id);
+            saveBooksToStorage();
+            populateFilters();
+            renderAdminTable();
+            showToast("تم حذف الكتاب من المكتبة");
+        }
+
+        // Reset Form Fields
+        function resetForm() {
+            document.getElementById('book-form').reset();
+            document.getElementById('book-id').value = '';
+            document.getElementById('form-title').innerText = "إضافة كتاب جديد";
+            document.getElementById('btn-submit-text').innerText = "حفظ الكتاب";
+            document.getElementById('form-icon').className = "fa-solid fa-plus-circle text-xl";
+            document.getElementById('btn-cancel').classList.add('hidden');
+        }
+
+        // Toast Notification Helper
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Utility: HTML Escaper to prevent XSS
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>
