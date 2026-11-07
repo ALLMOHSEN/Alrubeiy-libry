@@ -38,12 +38,15 @@
                 </button>
 
                 <!-- Navigation Tabs -->
-                <div class="flex bg-indigo-950 dark:bg-slate-950 p-1 rounded-xl border dark:border-slate-800">
-                    <button id="tab-view" onclick="switchTab('view')" class="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-200 text-white bg-indigo-600 dark:bg-indigo-600 shadow">
+                <div class="flex bg-indigo-950 dark:bg-slate-950 p-1 rounded-xl border dark:border-slate-800 text-xs md:text-sm">
+                    <button id="tab-view" onclick="switchTab('view')" class="flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold transition-all duration-200 text-white bg-indigo-600 shadow">
                         <i class="fa-solid fa-grip-vertical"></i> المعرض
                     </button>
-                    <button id="tab-admin" onclick="switchTab('admin')" class="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-200 text-indigo-200 hover:text-white dark:text-slate-400 dark:hover:text-white">
-                        <i class="fa-solid fa-sliders"></i> لوحة الإدارة
+                    <button id="tab-admin" onclick="switchTab('admin')" class="flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold transition-all duration-200 text-indigo-200 hover:text-white dark:text-slate-400 dark:hover:text-white">
+                        <i class="fa-solid fa-sliders"></i> الإدارة
+                    </button>
+                    <button id="tab-backup" onclick="switchTab('backup')" class="flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold transition-all duration-200 text-indigo-200 hover:text-white dark:text-slate-400 dark:hover:text-white">
+                        <i class="fa-solid fa-database"></i> النسخ الاحتياطي
                     </button>
                 </div>
             </div>
@@ -55,16 +58,12 @@
 
         <!-- VIEW PAGE -->
         <section id="page-view" class="space-y-6">
-            
-            <!-- Search & Filters Header -->
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-4 justify-between items-center transition-colors">
-                <!-- Search Input -->
                 <div class="relative w-full md:w-1/2">
                     <i class="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="ابحث باسم الكتاب أو المؤلف..." class="w-full pr-11 pl-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all text-slate-700 dark:text-slate-200 placeholder-slate-400">
+                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="ابحث باسم الكتاب أو المؤلف..." class="w-full pr-11 pl-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-slate-700 dark:text-slate-200 placeholder-slate-400">
                 </div>
 
-                <!-- Category & Author Filters -->
                 <div class="flex flex-wrap gap-3 w-full md:w-auto">
                     <select id="filter-author" onchange="applyFilters()" class="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-slate-600 dark:text-slate-300">
                         <option value="">جميع المؤلفين</option>
@@ -76,12 +75,10 @@
                 </div>
             </div>
 
-            <!-- Books Grid: Always 2 Columns -->
             <div id="books-grid" class="grid grid-cols-2 gap-4 md:gap-6">
-                <!-- Dynamic cards injected via JS -->
+                <!-- Dynamic cards -->
             </div>
 
-            <!-- Empty State -->
             <div id="empty-view" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
                 <i class="fa-solid fa-book-open text-5xl text-slate-300 dark:text-slate-700 mb-3"></i>
                 <p class="text-slate-500 dark:text-slate-400 text-lg font-medium">لم يتم العثور على كتب تطابق البحث</p>
@@ -90,8 +87,6 @@
 
         <!-- ADMIN PAGE -->
         <section id="page-admin" class="hidden space-y-8">
-            
-            <!-- Book Form -->
             <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
                 <h2 id="form-title" class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
                     <i class="fa-solid fa-plus-circle text-indigo-600 dark:text-indigo-400"></i> إضافة كتاب جديد
@@ -122,24 +117,20 @@
                         </div>
                     </div>
 
-                    <!-- Image Upload Section -->
                     <div class="border-t border-slate-100 dark:border-slate-800 pt-5">
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">غلاف الكتاب</label>
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-                            <!-- Option 1: URL -->
                             <div>
                                 <span class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">رابط مباشر للصورة:</span>
                                 <input type="url" id="image-url" oninput="handleUrlInput()" placeholder="https://example.com/cover.jpg" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm dark:text-slate-100">
                             </div>
 
-                            <!-- Option 2: File Upload -->
                             <div>
                                 <span class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">أو رفع ملف من الجهاز:</span>
                                 <input type="file" id="image-file" accept="image/*" onchange="handleFileInput(event)" class="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-950 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900 cursor-pointer">
                             </div>
 
-                            <!-- Image Preview -->
                             <div class="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 min-h-[120px]">
                                 <span class="text-xs text-slate-400 dark:text-slate-500 mb-2">معاينة الغلاف</span>
                                 <img id="image-preview" src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80" class="h-28 w-20 object-cover rounded shadow border border-slate-200 dark:border-slate-700" alt="معاينة">
@@ -147,9 +138,8 @@
                         </div>
                     </div>
 
-                    <!-- Form Buttons -->
                     <div class="flex gap-3 pt-2">
-                        <button type="submit" id="btn-submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white py-3.5 px-6 rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex justify-center items-center gap-2">
+                        <button type="submit" id="btn-submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 px-6 rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex justify-center items-center gap-2">
                             <i class="fa-solid fa-plus"></i> إضافة الكتاب
                         </button>
                         <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3.5 px-6 rounded-xl font-bold transition-all">
@@ -159,7 +149,6 @@
                 </form>
             </div>
 
-            <!-- Books Table -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
                 <div class="p-5 border-b border-slate-100 dark:border-slate-800">
                     <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">قائمة الكتب والمخزون</h3>
@@ -177,9 +166,49 @@
                             </tr>
                         </thead>
                         <tbody id="books-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
-                            <!-- Dynamic rows injected via JS -->
+                            <!-- Dynamic rows -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- BACKUP & RESTORE PAGE -->
+        <section id="page-backup" class="hidden space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Download / Export Card -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-6">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl mb-4">
+                            <i class="fa-solid fa-file-arrow-down"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">تصدير نسخة احتياطية</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                            قم بتحميل ملف يحتوى على جميع الكتب المخزنة والصور والبيانات بتنسيق JSON لاحتفاظ نسخة آمنة على جهازك.
+                        </p>
+                    </div>
+                    <button onclick="exportBackup()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> تحميل ملف النسخة الاحتياطية
+                    </button>
+                </div>
+
+                <!-- Restore / Import Card -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-6">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl mb-4">
+                            <i class="fa-solid fa-file-arrow-up"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">استعادة نسخة احتياطية</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                            اختر ملف نسخة احتياطية سابق (.json) لاسترجاع بيانات المكتبة وتحديث قائمة الكتب الحالية تلقائياً.
+                        </p>
+                    </div>
+                    <div>
+                        <input type="file" id="backup-file-input" accept=".json" onchange="importBackup(event)" class="hidden">
+                        <button onclick="document.getElementById('backup-file-input').click()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-upload"></i> رفع واستعادة النسخة الاحتياطية
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -196,7 +225,6 @@
         const DEFAULT_COVER = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80';
         let currentImageBase64 = '';
 
-        // Initial Data
         const initialBooks = [
             {
                 id: '1',
@@ -216,7 +244,6 @@
             }
         ];
 
-        // Dark Mode Logic
         function initTheme() {
             const savedTheme = localStorage.getItem('digital_library_theme');
             const icon = document.getElementById('theme-toggle-icon');
@@ -245,7 +272,6 @@
             }
         }
 
-        // Load Books from LocalStorage or Set Default
         function getBooks() {
             const data = localStorage.getItem('digital_library_books');
             if (!data) {
@@ -262,27 +288,73 @@
             populateFilters();
         }
 
-        // Tab Switching
         function switchTab(tab) {
             const viewPage = document.getElementById('page-view');
             const adminPage = document.getElementById('page-admin');
+            const backupPage = document.getElementById('page-backup');
+
             const tabView = document.getElementById('tab-view');
             const tabAdmin = document.getElementById('tab-admin');
+            const tabBackup = document.getElementById('tab-backup');
+
+            const activeClass = 'flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold transition-all duration-200 text-white bg-indigo-600 shadow';
+            const inactiveClass = 'flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold transition-all duration-200 text-indigo-200 hover:text-white dark:text-slate-400 dark:hover:text-white';
+
+            viewPage.classList.add('hidden');
+            adminPage.classList.add('hidden');
+            backupPage.classList.add('hidden');
+
+            tabView.className = inactiveClass;
+            tabAdmin.className = inactiveClass;
+            tabBackup.className = inactiveClass;
 
             if (tab === 'view') {
                 viewPage.classList.remove('hidden');
-                adminPage.classList.add('hidden');
-                tabView.className = 'flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-200 text-white bg-indigo-600 dark:bg-indigo-600 shadow';
-                tabAdmin.className = 'flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-200 text-indigo-200 hover:text-white dark:text-slate-400 dark:hover:text-white';
-            } else {
+                tabView.className = activeClass;
+            } else if (tab === 'admin') {
                 adminPage.classList.remove('hidden');
-                viewPage.classList.add('hidden');
-                tabAdmin.className = 'flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-200 text-white bg-indigo-600 dark:bg-indigo-600 shadow';
-                tabView.className = 'flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-200 text-indigo-200 hover:text-white dark:text-slate-400 dark:hover:text-white';
+                tabAdmin.className = activeClass;
+            } else if (tab === 'backup') {
+                backupPage.classList.remove('hidden');
+                tabBackup.className = activeClass;
             }
         }
 
-        // Handle Image Input via URL
+        // Backup Export
+        function exportBackup() {
+            const books = getBooks();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(books, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `digital_library_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Backup Import
+        function importBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const importedBooks = JSON.parse(evt.target.result);
+                    if (Array.isArray(importedBooks)) {
+                        saveBooks(importedBooks);
+                        alert('تم استعادة النسخة الاحتياطية بنجاح!');
+                        switchTab('view');
+                    } else {
+                        alert('الملف المرفق غير صالح.');
+                    }
+                } catch (err) {
+                    alert('حدث خطأ أثناء قراءة الملف. يرجى التأكد من اختيار ملف JSON صحيح.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
         function handleUrlInput() {
             const url = document.getElementById('image-url').value.trim();
             const preview = document.getElementById('image-preview');
@@ -291,7 +363,6 @@
             preview.src = url || DEFAULT_COVER;
         }
 
-        // Handle Image Input via File Upload
         function handleFileInput(e) {
             const file = e.target.files[0];
             if (file) {
@@ -305,7 +376,6 @@
             }
         }
 
-        // Render Cards View (Always 2 Columns Layout)
         function renderView(filteredBooks = null) {
             const books = filteredBooks || getBooks();
             const grid = document.getElementById('books-grid');
@@ -353,7 +423,6 @@
             });
         }
 
-        // Render Admin Table
         function renderAdminTable() {
             const books = getBooks();
             const tbody = document.getElementById('books-table-body');
@@ -385,7 +454,6 @@
             });
         }
 
-        // Populate Dropdown Filters
         function populateFilters() {
             const books = getBooks();
             const authorSelect = document.getElementById('filter-author');
@@ -405,7 +473,6 @@
             });
         }
 
-        // Live Search & Filter Logic
         function applyFilters() {
             const query = document.getElementById('search-input').value.trim().toLowerCase();
             const selectedAuthor = document.getElementById('filter-author').value;
@@ -423,7 +490,6 @@
             renderView(filtered);
         }
 
-        // Form Submission (Add / Edit)
         function handleFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('book-id').value;
@@ -461,7 +527,6 @@
             switchTab('view');
         }
 
-        // Edit Book Handler
         function editBook(id) {
             const books = getBooks();
             const book = books.find(b => b.id === id);
@@ -487,10 +552,10 @@
             document.getElementById('btn-submit').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات';
             document.getElementById('btn-cancel').classList.remove('hidden');
 
+            switchTab('admin');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Delete Book Handler
         function deleteBook(id) {
             if (confirm('هل أنت تأكد من رغبتك في حذف هذا الكتاب؟')) {
                 const books = getBooks().filter(b => b.id !== id);
@@ -498,7 +563,6 @@
             }
         }
 
-        // Reset Form State
         function resetForm() {
             document.getElementById('book-form').reset();
             document.getElementById('book-id').value = '';
@@ -509,7 +573,6 @@
             document.getElementById('btn-cancel').classList.add('hidden');
         }
 
-        // Initial Load
         window.onload = function() {
             initTheme();
             renderView();
