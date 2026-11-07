@@ -1,0 +1,234 @@
+[
+  {
+    "id": "101",
+    "title": "مختصر تاريخ الأدب",
+    "author": "جون سدرلاند",
+    "category": "أدب ونقد",
+    "stock": 4,
+    "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80"
+  },
+  {
+    "id": "102",
+    "title": "مختصر تاريخ الفن",
+    "author": "شارلوت مولنز",
+    "category": "فنون وتصميم",
+    "stock": 3,
+    "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&q=80"
+  },
+  {
+    "id": "103",
+    "title": "مختصر تاريخ الولايات المتحدة",
+    "author": "جيمس ويست ديفيد",
+    "category": "تاريخ",
+    "stock": 5,
+    "image": "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&q=80"
+  },
+  {
+    "id": "104",
+    "title": "الأوديسة",
+    "author": "ستيفن فراي",
+    "category": "روايات وأدب",
+    "stock": 6,
+    "image": "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80"
+  },
+  {
+    "id": "105",
+    "title": "إمبراطورية الكئاب - تاريخ جديد",
+    "author": "جوناتان سادوفسكي",
+    "category": "تاريخ وعلم نفس",
+    "stock": 3,
+    "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80"
+  },
+  {
+    "id": "106",
+    "title": "آباء الفلسفة الغربية الحديثة",
+    "author": "حاتم السروي",
+    "category": "فلسفة",
+    "stock": 4,
+    "image": "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=400&q=80"
+  },
+  {
+    "id": "107",
+    "title": "تأملات في فلسفة حكم البشر",
+    "author": "د. منذر الشاوي",
+    "category": "فلسفة وسياسة",
+    "stock": 2,
+    "image": "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=400&q=80"
+  },
+  {
+    "id": "108",
+    "title": "الشهامة",
+    "author": "مجموعة من المؤلفين",
+    "category": "فلسفة واجتماع",
+    "stock": 5,
+    "image": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&q=80"
+  },
+  {
+    "id": "109",
+    "title": "أهلاً بالفشل!",
+    "author": "إريك كيسلز",
+    "category": "تطوير الذات والتصميم",
+    "stock": 7,
+    "image": "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=400&q=80"
+  },
+  {
+    "id": "110",
+    "title": "سيكولوجية الثقة",
+    "author": "ترجمة: محمود راضي",
+    "category": "علم نفس",
+    "stock": 4,
+    "image": "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=400&q=80"
+  },
+  {
+    "id": "111",
+    "title": "أساسيات الرسم بالحاسوب",
+    "author": "د. أحمد كمال الدين",
+    "category": "تكنولوجيا وتصميم",
+    "stock": 6,
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&q=80"
+  },
+  {
+    "id": "112",
+    "title": "إدارة المصارف التجارية - مدخل إدارة المخاطر",
+    "author": "د. طاهر فاضل السامرائي",
+    "category": "إدارة واقتصاد",
+    "stock": 3,
+    "image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80"
+  },
+  {
+    "id": "113",
+    "title": "إدارة التناقضات",
+    "author": "د. حسن عبد الكريم",
+    "category": "إدارة وإستراتيجية",
+    "stock": 5,
+    "image": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&q=80"
+  },
+  {
+    "id": "114",
+    "title": "المحاسبة في عصر التحول الرقمي",
+    "author": "د. زياد هاشم السقا",
+    "category": "محاسبة وتكنولوجيا",
+    "stock": 4,
+    "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80"
+  },
+  {
+    "id": "115",
+    "title": "شي جين بينغ: حول الحكم والإدارة (المجلد الأول)",
+    "author": "شي جين بينغ",
+    "category": "سياسة وفكر",
+    "stock": 2,
+    "image": "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&q=80"
+  },
+  {
+    "id": "116",
+    "title": "شي جين بينغ: حول الحكم والإدارة (المجلد الثاني)",
+    "author": "شي جين بينغ",
+    "category": "سياسة وفكر",
+    "stock": 2,
+    "image": "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&q=80"
+  },
+  {
+    "id": "117",
+    "title": "شي جين بينغ: حول الحكم والإدارة (المجلد الثالث)",
+    "author": "شي جين بينغ",
+    "category": "سياسة وفكر",
+    "stock": 2,
+    "image": "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&q=80"
+  },
+  {
+    "id": "118",
+    "title": "تصميم هوية العلامة التجارية",
+    "author": "ألينا ويلر",
+    "category": "فنون وتصميم",
+    "stock": 5,
+    "image": "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&q=80"
+  },
+  {
+    "id": "119",
+    "title": "How to Design a Logo",
+    "author": "جراهام ديفيدسون",
+    "category": "فنون وتصميم",
+    "stock": 4,
+    "image": "https://images.unsplash.com/photo-1626785774625-ddcddc3445e9?w=400&q=80"
+  },
+  {
+    "id": "120",
+    "title": "تاريخ التصميم الجرافيكي العربي",
+    "author": "مأمون الصقال",
+    "category": "فنون وتصميم",
+    "stock": 3,
+    "image": "https://images.unsplash.com/photo-1561070791-26c11d699e3d?w=400&q=80"
+  },
+  {
+    "id": "121",
+    "title": "التصميم الجرافيكي للجميع",
+    "author": "خالد المهندي",
+    "category": "فنون وتصميم",
+    "stock": 6,
+    "image": "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=400&q=80"
+  },
+  {
+    "id": "122",
+    "title": "البيت العراقي في الحلة والموصل وبغداد",
+    "author": "د. سعيد الديوه جي",
+    "category": "تاريخ وعمارة",
+    "stock": 3,
+    "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&q=80"
+  },
+  {
+    "id": "123",
+    "title": "عبد الرحمن عارف: الرئيس الرابع",
+    "author": "سعيد خادم كاطع",
+    "category": "تاريخ وسير",
+    "stock": 2,
+    "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80"
+  },
+  {
+    "id": "124",
+    "title": "شقة في باريس",
+    "author": "غيوم ميسو",
+    "category": "روايات وأدب",
+    "stock": 8,
+    "image": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80"
+  },
+  {
+    "id": "125",
+    "title": "شحاذة في باريس",
+    "author": "إيزابيل أليندي",
+    "category": "روايات وأدب",
+    "stock": 5,
+    "image": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80"
+  },
+  {
+    "id": "126",
+    "title": "مساحات مفقودة",
+    "author": "علي المعموري",
+    "category": "أدب وروايات",
+    "stock": 4,
+    "image": "https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=400&q=80"
+  },
+  {
+    "id": "127",
+    "title": "مشاكل وحلول: أهمية النظافة",
+    "author": "دار العلم للملايين",
+    "category": "أطفال وتعلّم",
+    "stock": 10,
+    "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80"
+  },
+  {
+    "id": "128",
+    "title": "مشاكل وحلول: نتحرك كثيراً",
+    "author": "دار العلم للملايين",
+    "category": "أطفال وتعلّم",
+    "stock": 12,
+    "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80"
+  },
+  {
+    "id": "129",
+    "title": "الوحش الصغير الغاضب!",
+    "author": "سلسلة قصص الأطفال",
+    "category": "أطفال وتعلّم",
+    "stock": 9,
+    "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&q=80"
+  }
+]
