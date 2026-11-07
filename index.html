@@ -164,13 +164,38 @@
                 </form>
             </div>
 
-            <!-- Books Table with Live Search -->
+            <!-- Stats & Table Section -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
+                
+                <!-- Total Counts Header Summary -->
+                <div class="p-5 bg-indigo-50/50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 bg-white dark:bg-slate-800 p-4 rounded-xl border border-indigo-100 dark:border-slate-700 shadow-sm">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold block">إجمالي عناوين الكتب</span>
+                            <span id="total-titles-count" class="text-xl font-black text-indigo-600 dark:text-indigo-400">0</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 bg-white dark:bg-slate-800 p-4 rounded-xl border border-emerald-100 dark:border-slate-700 shadow-sm">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold block">إجمالي قطع المخزون</span>
+                            <span id="total-stock-count" class="text-xl font-black text-emerald-600 dark:text-emerald-400">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Live Search & Controls -->
                 <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">قائمة الكتب والمخزون</h3>
                     
                     <div class="relative w-full sm:w-72">
-                        <i class="fa-solid fa-boxes-stacked absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         <input type="text" id="admin-search-input" oninput="renderAdminTable()" placeholder="بحث بالمخزون، العنوان أو المؤلف..." class="w-full pr-10 pl-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs md:text-sm text-slate-700 dark:text-slate-200">
                     </div>
                 </div>
@@ -246,7 +271,7 @@
     <script>
         const DEFAULT_COVER = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80';
         let currentImageBase64 = '';
-        let currentViewMode = 'grid'; // 'grid' or 'list'
+        let currentViewMode = 'grid';
 
         const initialBooks = [
             {
@@ -382,7 +407,14 @@
                 try {
                     const importedBooks = JSON.parse(evt.target.result);
                     if (Array.isArray(importedBooks)) {
-                        saveBooks(importedBooks);
+                        // Ensure IDs are cast to strings
+                        const sanitizedBooks = importedBooks.map((b, index) => ({
+                            ...b,
+                            id: b.id ? String(b.id) : (Date.now() + index).toString(),
+                            stock: parseInt(b.stock) || 0
+                        }));
+
+                        saveBooks(sanitizedBooks);
                         alert('تم استعادة النسخة الاحتياطية بنجاح!');
                         switchTab('view');
                     } else {
@@ -465,7 +497,6 @@
                     container.innerHTML += card;
                 });
             } else {
-                // List View Mode
                 container.className = 'space-y-4 w-full';
 
                 books.forEach(book => {
@@ -505,6 +536,13 @@
             const tbody = document.getElementById('books-table-body');
             const searchInput = document.getElementById('admin-search-input');
             const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+            // Calculate Totals
+            const totalTitles = books.length;
+            const totalStock = books.reduce((acc, b) => acc + (parseInt(b.stock) || 0), 0);
+
+            document.getElementById('total-titles-count').textContent = totalTitles;
+            document.getElementById('total-stock-count').textContent = totalStock;
 
             tbody.innerHTML = '';
 
@@ -608,7 +646,8 @@
             let books = getBooks();
 
             if (id) {
-                books = books.map(b => b.id === id ? { id, title, author, category, stock, image } : b);
+                // Loose string matching comparison for full compatibility
+                books = books.map(b => String(b.id) === String(id) ? { id: String(id), title, author, category, stock, image } : b);
             } else {
                 const newBook = {
                     id: Date.now().toString(),
@@ -623,15 +662,16 @@
 
             saveBooks(books);
             resetForm();
-            switchTab('view');
+            switchTab('admin');
         }
 
         function editBook(id) {
             const books = getBooks();
-            const book = books.find(b => b.id === id);
+            // Robust String comparison for all types of JSON IDs
+            const book = books.find(b => String(b.id) === String(id));
             if (!book) return;
 
-            document.getElementById('book-id').value = book.id;
+            document.getElementById('book-id').value = String(book.id);
             document.getElementById('title').value = book.title;
             document.getElementById('author').value = book.author;
             document.getElementById('category').value = book.category;
@@ -657,7 +697,7 @@
 
         function deleteBook(id) {
             if (confirm('هل أنت تأكد من رغبتك في حذف هذا الكتاب؟')) {
-                const books = getBooks().filter(b => b.id !== id);
+                const books = getBooks().filter(b => String(b.id) !== String(id));
                 saveBooks(books);
             }
         }
